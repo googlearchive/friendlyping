@@ -1,4 +1,3 @@
-<?xml version="1.0" encoding="utf-8"?>
 <!--
   ~ Copyright Google Inc.
   ~
@@ -16,5 +15,8 @@
   -->
 
 <resources>
-    <string name="banner_ad_unit_id">meh</string>
+    <!-- This is an ad unit ID for a test ad. Replace with your own banner ad unit id. -->
+    <string name="banner_ad_unit_id">ca-app-pub-3940256099942544/6300978111</string>
+    <!-- Use your device's id in order to display the test ad. -->
+    <string name="test_device_id">AAF55FC1CC86C5B4FE07CC865AE73CA5</string>
 </resources>
