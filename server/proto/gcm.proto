@@ -1,0 +1,56 @@
+syntax = "proto2";
+
+package proto;
+
+// Data structures
+
+// This could be a bit redundant, giving that the type of message already
+// identifies the action.
+message Action {
+  enum Name {
+    UNSPECIFIED = 0;
+    REGISTER_NEW_CLIENT = 1;
+    BROADCAST_NEW_CLIENT = 2;
+    SEND_CLIENT_LIST = 3;
+    PING_CLIENT = 4;
+  }
+}
+
+// A connected client
+message Client {
+  required string name = 1;
+  required string registration_token = 2;
+  required string profile_picture_url = 3;
+}
+
+// A list of clients
+message ClientList {
+  repeated Client clients = 1;
+}
+
+// Messages
+
+// Registration request for a new client (device -> server)
+message RegisterNewClient {
+  required Client client = 1;
+  required Action action = 2;
+}
+
+// Broadcast new client to registered clients
+message BroadcastNewClient {
+  required Client client = 1;
+  required Action action = 2;
+}
+
+// Send registered clients list to new client
+message SendClientList {
+  required ClientList clientList = 1;
+  required Action action = 2;
+}
+
+// Ping client
+message PingClient {
+  required Client to = 1;
+  required Client from = 2;
+  required Action action = 3;
+}
