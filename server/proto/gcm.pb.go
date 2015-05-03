@@ -9,9 +9,8 @@ It is generated from these files:
 	proto/gcm.proto
 
 It has these top-level messages:
-	Action
 	Client
-	ClientList
+	FriendlyPingMessage
 	RegisterNewClient
 	BroadcastNewClient
 	SendClientList
@@ -26,24 +25,25 @@ import math "math"
 var _ = proto1.Marshal
 var _ = math.Inf
 
-type Action_Name int32
+// The action represented by the message
+type Action int32
 
 const (
-	Action_UNSPECIFIED          Action_Name = 0
-	Action_REGISTER_NEW_CLIENT  Action_Name = 1
-	Action_BROADCAST_NEW_CLIENT Action_Name = 2
-	Action_SEND_CLIENT_LIST     Action_Name = 3
-	Action_PING_CLIENT          Action_Name = 4
+	Action_UNSPECIFIED          Action = 0
+	Action_REGISTER_NEW_CLIENT  Action = 1
+	Action_BROADCAST_NEW_CLIENT Action = 2
+	Action_SEND_CLIENT_LIST     Action = 3
+	Action_PING_CLIENT          Action = 4
 )
 
-var Action_Name_name = map[int32]string{
+var Action_name = map[int32]string{
 	0: "UNSPECIFIED",
 	1: "REGISTER_NEW_CLIENT",
 	2: "BROADCAST_NEW_CLIENT",
 	3: "SEND_CLIENT_LIST",
 	4: "PING_CLIENT",
 }
-var Action_Name_value = map[string]int32{
+var Action_value = map[string]int32{
 	"UNSPECIFIED":          0,
 	"REGISTER_NEW_CLIENT":  1,
 	"BROADCAST_NEW_CLIENT": 2,
@@ -51,32 +51,22 @@ var Action_Name_value = map[string]int32{
 	"PING_CLIENT":          4,
 }
 
-func (x Action_Name) Enum() *Action_Name {
-	p := new(Action_Name)
+func (x Action) Enum() *Action {
+	p := new(Action)
 	*p = x
 	return p
 }
-func (x Action_Name) String() string {
-	return proto1.EnumName(Action_Name_name, int32(x))
+func (x Action) String() string {
+	return proto1.EnumName(Action_name, int32(x))
 }
-func (x *Action_Name) UnmarshalJSON(data []byte) error {
-	value, err := proto1.UnmarshalJSONEnum(Action_Name_value, data, "Action_Name")
+func (x *Action) UnmarshalJSON(data []byte) error {
+	value, err := proto1.UnmarshalJSONEnum(Action_value, data, "Action")
 	if err != nil {
 		return err
 	}
-	*x = Action_Name(value)
+	*x = Action(value)
 	return nil
 }
-
-// This could be a bit redundant, giving that the type of message already
-// identifies the action.
-type Action struct {
-	XXX_unrecognized []byte `json:"-"`
-}
-
-func (m *Action) Reset()         { *m = Action{} }
-func (m *Action) String() string { return proto1.CompactTextString(m) }
-func (*Action) ProtoMessage()    {}
 
 // A connected client
 type Client struct {
@@ -111,19 +101,52 @@ func (m *Client) GetProfilePictureUrl() string {
 	return ""
 }
 
-// A list of clients
-type ClientList struct {
-	Clients          []*Client `protobuf:"bytes,1,rep,name=clients" json:"clients,omitempty"`
-	XXX_unrecognized []byte    `json:"-"`
+// A friendly ping message can have different payloads
+// depending on the action
+type FriendlyPingMessage struct {
+	Action           *Action             `protobuf:"varint,1,req,name=action,enum=proto.Action" json:"action,omitempty"`
+	RncPayload       *RegisterNewClient  `protobuf:"bytes,2,opt,name=rnc_payload" json:"rnc_payload,omitempty"`
+	BncPayload       *BroadcastNewClient `protobuf:"bytes,3,opt,name=bnc_payload" json:"bnc_payload,omitempty"`
+	SclPayload       *SendClientList     `protobuf:"bytes,4,opt,name=scl_payload" json:"scl_payload,omitempty"`
+	PcPayload        *PingClient         `protobuf:"bytes,5,opt,name=pc_payload" json:"pc_payload,omitempty"`
+	XXX_unrecognized []byte              `json:"-"`
 }
 
-func (m *ClientList) Reset()         { *m = ClientList{} }
-func (m *ClientList) String() string { return proto1.CompactTextString(m) }
-func (*ClientList) ProtoMessage()    {}
+func (m *FriendlyPingMessage) Reset()         { *m = FriendlyPingMessage{} }
+func (m *FriendlyPingMessage) String() string { return proto1.CompactTextString(m) }
+func (*FriendlyPingMessage) ProtoMessage()    {}
 
-func (m *ClientList) GetClients() []*Client {
+func (m *FriendlyPingMessage) GetAction() Action {
+	if m != nil && m.Action != nil {
+		return *m.Action
+	}
+	return Action_UNSPECIFIED
+}
+
+func (m *FriendlyPingMessage) GetRncPayload() *RegisterNewClient {
 	if m != nil {
-		return m.Clients
+		return m.RncPayload
+	}
+	return nil
+}
+
+func (m *FriendlyPingMessage) GetBncPayload() *BroadcastNewClient {
+	if m != nil {
+		return m.BncPayload
+	}
+	return nil
+}
+
+func (m *FriendlyPingMessage) GetSclPayload() *SendClientList {
+	if m != nil {
+		return m.SclPayload
+	}
+	return nil
+}
+
+func (m *FriendlyPingMessage) GetPcPayload() *PingClient {
+	if m != nil {
+		return m.PcPayload
 	}
 	return nil
 }
@@ -131,7 +154,6 @@ func (m *ClientList) GetClients() []*Client {
 // Registration request for a new client (device -> server)
 type RegisterNewClient struct {
 	Client           *Client `protobuf:"bytes,1,req,name=client" json:"client,omitempty"`
-	Action           *Action `protobuf:"bytes,2,req,name=action" json:"action,omitempty"`
 	XXX_unrecognized []byte  `json:"-"`
 }
 
@@ -146,17 +168,9 @@ func (m *RegisterNewClient) GetClient() *Client {
 	return nil
 }
 
-func (m *RegisterNewClient) GetAction() *Action {
-	if m != nil {
-		return m.Action
-	}
-	return nil
-}
-
-// Broadcast new client to registered clients
+// Broadcast new client to registered clients (server -> devices)
 type BroadcastNewClient struct {
 	Client           *Client `protobuf:"bytes,1,req,name=client" json:"client,omitempty"`
-	Action           *Action `protobuf:"bytes,2,req,name=action" json:"action,omitempty"`
 	XXX_unrecognized []byte  `json:"-"`
 }
 
@@ -171,43 +185,27 @@ func (m *BroadcastNewClient) GetClient() *Client {
 	return nil
 }
 
-func (m *BroadcastNewClient) GetAction() *Action {
-	if m != nil {
-		return m.Action
-	}
-	return nil
-}
-
-// Send registered clients list to new client
+// Send registered clients list to new client (server -> device)
 type SendClientList struct {
-	ClientList       *ClientList `protobuf:"bytes,1,req,name=clientList" json:"clientList,omitempty"`
-	Action           *Action     `protobuf:"bytes,2,req,name=action" json:"action,omitempty"`
-	XXX_unrecognized []byte      `json:"-"`
+	Clients          []*Client `protobuf:"bytes,1,rep,name=clients" json:"clients,omitempty"`
+	XXX_unrecognized []byte    `json:"-"`
 }
 
 func (m *SendClientList) Reset()         { *m = SendClientList{} }
 func (m *SendClientList) String() string { return proto1.CompactTextString(m) }
 func (*SendClientList) ProtoMessage()    {}
 
-func (m *SendClientList) GetClientList() *ClientList {
+func (m *SendClientList) GetClients() []*Client {
 	if m != nil {
-		return m.ClientList
+		return m.Clients
 	}
 	return nil
 }
 
-func (m *SendClientList) GetAction() *Action {
-	if m != nil {
-		return m.Action
-	}
-	return nil
-}
-
-// Ping client
+// Ping client (deviceFrom -> server -> deviceTo)
 type PingClient struct {
 	To               *Client `protobuf:"bytes,1,req,name=to" json:"to,omitempty"`
-	From             *Client `protobuf:"bytes,2,req,name=from" json:"from,omitempty"`
-	Action           *Action `protobuf:"bytes,3,req,name=action" json:"action,omitempty"`
+	Pinger           *Client `protobuf:"bytes,2,req,name=pinger" json:"pinger,omitempty"`
 	XXX_unrecognized []byte  `json:"-"`
 }
 
@@ -222,20 +220,13 @@ func (m *PingClient) GetTo() *Client {
 	return nil
 }
 
-func (m *PingClient) GetFrom() *Client {
+func (m *PingClient) GetPinger() *Client {
 	if m != nil {
-		return m.From
-	}
-	return nil
-}
-
-func (m *PingClient) GetAction() *Action {
-	if m != nil {
-		return m.Action
+		return m.Pinger
 	}
 	return nil
 }
 
 func init() {
-	proto1.RegisterEnum("proto.Action_Name", Action_Name_name, Action_Name_value)
+	proto1.RegisterEnum("proto.Action", Action_name, Action_value)
 }

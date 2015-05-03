@@ -4,16 +4,13 @@ package proto;
 
 // Data structures
 
-// This could be a bit redundant, giving that the type of message already
-// identifies the action.
-message Action {
-  enum Name {
+// The action represented by the message
+enum Action {
     UNSPECIFIED = 0;
     REGISTER_NEW_CLIENT = 1;
     BROADCAST_NEW_CLIENT = 2;
     SEND_CLIENT_LIST = 3;
     PING_CLIENT = 4;
-  }
 }
 
 // A connected client
@@ -23,34 +20,35 @@ message Client {
   required string profile_picture_url = 3;
 }
 
-// A list of clients
-message ClientList {
-  repeated Client clients = 1;
+// A friendly ping message can have different payloads
+// depending on the action
+message FriendlyPingMessage {
+  required Action action = 1;
+  optional RegisterNewClient rnc_payload = 2;
+  optional BroadcastNewClient bnc_payload = 3;
+  optional SendClientList scl_payload = 4;
+  optional PingClient pc_payload = 5;
 }
 
-// Messages
+// Payloads
 
 // Registration request for a new client (device -> server)
 message RegisterNewClient {
   required Client client = 1;
-  required Action action = 2;
 }
 
-// Broadcast new client to registered clients
+// Broadcast new client to registered clients (server -> devices)
 message BroadcastNewClient {
   required Client client = 1;
-  required Action action = 2;
 }
 
-// Send registered clients list to new client
+// Send registered clients list to new client (server -> device)
 message SendClientList {
-  required ClientList clientList = 1;
-  required Action action = 2;
+  repeated Client clients = 1;
 }
 
-// Ping client
+// Ping client (deviceFrom -> server -> deviceTo)
 message PingClient {
   required Client to = 1;
-  required Client from = 2;
-  required Action action = 3;
+  required Client pinger = 2;
 }
