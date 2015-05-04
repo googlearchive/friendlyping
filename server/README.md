@@ -4,7 +4,12 @@ golang Friendly Ping
 ## Installation
 Install protobuf for go
     $ go get github.com/golang/protobuf/proto
-Copy ali's demon to `github.com/aliafshar/gcm` in the `src` folder of your `GOPATH`, and go get its dependencies (won't be needed when the deamon is published).
+Copy ali's demon from `https://devrel.git.corp.google.com/libraries/gcm-go/` to `github.com/aliafshar/gcm` in the `src` folder of your `GOPATH`, and go get its dependencies (won't be needed when the deamon is published).
+
+    $ cd $GOPATH
+    $ git clone sso://devrel/libraries/gcm-go src/github.com/aliafshar/gcm
+    $ go get -a github.com/mattn/go-xmpp
+
 
 ## Usage
 

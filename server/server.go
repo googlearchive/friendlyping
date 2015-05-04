@@ -7,7 +7,7 @@ import (
 	"io/ioutil"
 	"log"
 
-	"github.com/aliafshar/gcmd"
+	"github.com/aliafshar/gcm"
 	"github.com/golang/protobuf/proto"
 
 	pb "./proto"
@@ -161,7 +161,7 @@ func newServer(apiKey, senderId string) *fpServer {
 func main() {
 	flag.Parse()
 	fpServer := newServer(*apiKey, *senderId)
-	err := gcm.Listen(*senderId, *apiKey, fpServer.onMessage)
+	err := gcm.Listen(*senderId, *apiKey, fpServer.onMessage, nil)
 	if err != nil {
 		panic(err)
 	}
