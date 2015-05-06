@@ -39,8 +39,6 @@ func (s *fpServer) onMessage(from string, m gcm.Message) error {
 	switch fpMessage.GetAction() {
 	case pb.Action_REGISTER_NEW_CLIENT:
 		return s.registerNewClient(fpMessage.GetRncPayload())
-	case pb.Action_PING_CLIENT:
-		return s.pingClient(fpMessage.GetPcPayload())
 	}
 	return nil
 }
@@ -84,21 +82,6 @@ func (s *fpServer) registerNewClient(rncPayload *pb.RegisterNewClient) error {
 
 	}
 	return err
-}
-
-// Send a ping
-func (s *fpServer) pingClient(pcPayload *pb.PingClient) error {
-	// TODO(silvano): The downside of sending the payload as base64 encoded protobuf is that we won't be able to
-	// take advantage of APNS notifications, because the GCM server expects a certain format for the payload.
-	// (If I understood correctly, on Android this is not a problem because the app always manages the reception
-	// of the notification.
-	// One solution could be to flag if a client is an iOS device, and if that's the case, transform the payload.
-	message, err := s.protoToBase64String(pcPayload)
-	if err != nil {
-		return err
-	}
-	return gcm.Send(s.apiKey, pcPayload.GetTo().GetRegistrationToken(),
-		gcm.Message{"base64": message})
 }
 
 // Transform the map of connected clients to an array of clients

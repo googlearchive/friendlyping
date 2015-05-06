@@ -24,10 +24,12 @@ message Client {
 // depending on the action
 message FriendlyPingMessage {
   required Action action = 1;
-  optional RegisterNewClient rnc_payload = 2;
-  optional BroadcastNewClient bnc_payload = 3;
-  optional SendClientList scl_payload = 4;
-  optional PingClient pc_payload = 5;
+  oneof payload {
+    RegisterNewClient rnc_payload = 2;
+    BroadcastNewClient bnc_payload = 3;
+    SendClientList scl_payload = 4;
+    PingClient pc_payload = 5;
+  }
 }
 
 // Payloads
@@ -47,8 +49,23 @@ message SendClientList {
   repeated Client clients = 1;
 }
 
-// Ping client (deviceFrom -> server -> deviceTo)
+// Ping client (devicePinger -> deviceTo)
 message PingClient {
   required Client to = 1;
   required Client pinger = 2;
+  repeated MapFieldEntry data = 3;
+  optional Notification notification = 4;
+}
+
+// A GCM notification
+message Notification {
+  optional string text = 1;
+  optional string title = 2;
+  optional string badge = 3;
+}
+
+// Hack for maps
+message MapFieldEntry {
+  required string key = 1;
+  required string value = 2;
 }
