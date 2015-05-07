@@ -26,7 +26,10 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.samples.apps.friendlyping.AnalyticsHelper;
 import com.google.samples.apps.friendlyping.R;
+
+import static com.google.samples.apps.friendlyping.TrackingEvent.USER_LOGIN;
 
 /**
  * A placeholder fragment containing a simple view.
@@ -65,6 +68,7 @@ public class SignInFragment extends Fragment {
                             + "to connect to it.");
                 } else {
                     mGoogleApiClient.connect();
+                    AnalyticsHelper.send(getActivity(), USER_LOGIN);
                 }
             }
         });

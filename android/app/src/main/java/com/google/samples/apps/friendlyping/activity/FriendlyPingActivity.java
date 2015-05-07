@@ -32,9 +32,12 @@ import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GooglePlayServicesUtil;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.plus.Plus;
+import com.google.samples.apps.friendlyping.AnalyticsHelper;
 import com.google.samples.apps.friendlyping.R;
 import com.google.samples.apps.friendlyping.fragment.FriendlyPingFragment;
 import com.google.samples.apps.friendlyping.fragment.SignInFragment;
+
+import static com.google.samples.apps.friendlyping.TrackingEvent.USER_LOGOUT;
 
 public class FriendlyPingActivity extends AppCompatActivity {
 
@@ -125,6 +128,7 @@ public class FriendlyPingActivity extends AppCompatActivity {
             if (mGoogleApiClient == null) {
                 Log.w(TAG, "GoogleApiClient is null. Make sure to set it before accessing it.");
             } else {
+                AnalyticsHelper.send(this, USER_LOGOUT);
                 if (mGoogleApiClient.isConnected()) {
                     Plus.AccountApi.clearDefaultAccount(mGoogleApiClient);
                     mGoogleApiClient.disconnect();
