@@ -1,20 +1,23 @@
 package main
 
 import (
-	"encoding/base64"
 	"encoding/json"
+	"errors"
 	"flag"
+	"fmt"
 	"io/ioutil"
 	"log"
 
 	"github.com/aliafshar/gcm"
-	"github.com/golang/protobuf/proto"
-
-	pb "./proto"
 )
 
 const (
-	newClientTopic = "/topics/newclient"
+	newClientTopic     = "/topics/newclient"
+	actionKey          = "action"
+	registerNewClient  = "register_new_client"
+	broadcastNewClient = "broadcast_new_client"
+	sendClientList     = "send_client_list"
+	pingClient         = "ping_client"
 )
 
 var (
@@ -27,97 +30,83 @@ var (
 type fpServer struct {
 	apiKey   string
 	senderId string
-	clients  map[string]*pb.Client
+	clients  map[string]*Client
+}
+
+// A friendly ping client
+type Client struct {
+	Name              string `json:"name,omitempty"`
+	RegistrationToken string `json:"registration_token,omitempty"`
+	ProfilePictureUrl string `json:"profile_picture_url,omitempty"`
 }
 
 // Callback for gcmd listen: check action and dispatch server method
-func (s *fpServer) onMessage(from string, m gcm.Message) error {
-	fpMessage, err := s.unpackMessageProto(m)
-	if err != nil {
-		return err
-	}
-	switch fpMessage.GetAction() {
-	case pb.Action_REGISTER_NEW_CLIENT:
-		return s.registerNewClient(fpMessage.GetRncPayload())
+func (s *fpServer) onMessage(from string, d gcm.Data) error {
+	switch d[actionKey] {
+	case registerNewClient:
+		return s.registerNewClient(d)
+	case pingClient:
+		return s.pingClient(d)
 	}
 	return nil
 }
 
-// Send the list of connected clients to a client
-func (s *fpServer) sendClientList(to string, clientList []*pb.Client) error {
-	payload := &pb.SendClientList{Clients: clientList}
-	action := pb.Action(pb.Action_SEND_CLIENT_LIST).Enum()
-	messageProto := &pb.FriendlyPingMessage{Action: action, SclPayload: payload}
-	message, err := s.protoToBase64String(messageProto)
-	if err != nil {
-		return err
-	}
-	return gcm.Send(s.apiKey, to, gcm.Message{"base64": message})
-}
-
-// Broadcast a new client sending a message to the new client topic
-func (s *fpServer) broadcastNewClient(c *pb.Client) error {
-	messageProto := &pb.BroadcastNewClient{Client: c}
-	message, err := s.protoToBase64String(messageProto)
-	if err != nil {
-		return err
-	}
-	return gcm.Send(s.apiKey, newClientTopic, gcm.Message{"base64": message})
-}
-
 // Add new client to registered clients, send list of registered clients to new client
 // broadcast the new client to new client topic
-func (s *fpServer) registerNewClient(rncPayload *pb.RegisterNewClient) error {
-	c := rncPayload.GetClient()
-	s.clients[c.GetRegistrationToken()] = c
-	err := s.broadcastNewClient(c)
+func (s *fpServer) registerNewClient(d gcm.Data) error {
+	name, ok := d["name"].(string)
+	if !ok {
+		return errors.New("Error decoding name for new client")
+	}
+	registrationToken, ok := d["registration_token"].(string)
+	if !ok {
+		return errors.New("Error decoding registration token for new client")
+	}
+	profilePictureUrl, ok := d["profile_picture_url"].(string)
+	if !ok {
+		return errors.New("Error decoding profile picture for new client")
+	}
+	client := &Client{name, registrationToken, profilePictureUrl}
+	s.clients[client.RegistrationToken] = client
+	err := s.broadcastNewClient(*client)
 	if err != nil {
 		// TODO(silvano): sshould panic and retry?
 		log.Printf("Failed broadcasting the new client: %v", err)
 	}
-	err = s.sendClientList(c.GetRegistrationToken(), s.getClientList())
+	err = s.sendClientList(*client)
 	if err != nil {
 		// TODO(silvano): should panic and retry?
-		log.Printf("Failed broadcasting the new client: %v", err)
+		log.Printf("Failed sending client list: %v", err)
 
 	}
 	return err
 }
 
+// Broadcast a new client sending a message to the new client topic
+func (s *fpServer) broadcastNewClient(c Client) error {
+	return gcm.Send(s.apiKey, gcm.Message{To: newClientTopic, Data: gcm.Data{actionKey: broadcastNewClient, "client": c}})
+}
+
+// Send the list of clients to the newly registered client
+func (s *fpServer) sendClientList(c Client) error {
+	return gcm.Send(s.apiKey, gcm.Message{To: c.RegistrationToken, Data: gcm.Data{actionKey: sendClientList, "clients": s.getClientList()}})
+}
+
+func (s *fpServer) pingClient(d gcm.Data) error {
+	client := d["client"].(Client)
+	notification := &gcm.Notification{Text: "Spock is pinging you!", Title: "Friendly Ping!"}
+	return gcm.Send(s.apiKey, gcm.Message{To: client.RegistrationToken, Data: gcm.Data{actionKey: pingClient}, Notification: *notification})
+}
+
 // Transform the map of connected clients to an array of clients
-func (s *fpServer) getClientList() []*pb.Client {
+func (s *fpServer) getClientList() []*Client {
 	i := 0
-	cl := make([]*pb.Client, len(s.clients))
+	cl := make([]*Client, len(s.clients))
 	for k := range s.clients {
 		cl[i] = s.clients[k]
 		i++
 	}
 	return cl
-}
-
-// Extract a Friendly Ping message from a gcmd message
-func (s *fpServer) unpackMessageProto(message gcm.Message) (*pb.FriendlyPingMessage, error) {
-	data, err := base64.StdEncoding.DecodeString(message["base64"].(string))
-	if err != nil {
-		log.Printf("Failed to decode message payload: %v", err)
-		return nil, err
-	}
-	fpMessage := new(pb.FriendlyPingMessage)
-	err = proto.Unmarshal(data, fpMessage)
-	if err != nil {
-		log.Printf("Unmarshaling error: ", err)
-		return nil, err
-	}
-	return fpMessage, nil
-}
-
-// Rocket science
-func (s *fpServer) protoToBase64String(message proto.Message) (string, error) {
-	data, err := proto.Marshal(message)
-	if err != nil {
-		return "", err
-	}
-	return base64.StdEncoding.EncodeToString(data), nil
 }
 
 // Load test data for the server
@@ -133,10 +122,12 @@ func (s *fpServer) loadTestData() {
 
 // Factory method for the fpServer
 func newServer(apiKey, senderId string) *fpServer {
-	s := &fpServer{apiKey: apiKey, senderId: senderId, clients: make(map[string]*pb.Client)} 
+	s := &fpServer{apiKey: apiKey, senderId: senderId, clients: make(map[string]*Client)}
 	if *testData != "" {
 		s.loadTestData()
 	}
+	serverAddress := fmt.Sprintf("%s@gcm.googleapis.com", senderId)
+	s.clients[serverAddress] = &Client{"Spock", serverAddress, "http://www.startrek.com/legacy_media/images/200307/spock01/320x240.jpg"}
 	return s
 }
 

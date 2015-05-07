@@ -2,13 +2,9 @@ golang Friendly Ping
 --
 
 ## Installation
-Install protobuf for go
-    $ go get github.com/golang/protobuf/proto
-Copy ali's demon from `https://devrel.git.corp.google.com/libraries/gcm-go/` to `github.com/aliafshar/gcm` in the `src` folder of your `GOPATH`, and go get its dependencies (won't be needed when the deamon is published).
+Install the gcm demon:
 
-    $ cd $GOPATH
-    $ git clone sso://devrel/libraries/gcm-go src/github.com/aliafshar/gcm
-    $ go get -a github.com/mattn/go-xmpp
+    $ go get -a github.com//aliafshar/gcm
 
 
 ## Usage
@@ -18,33 +14,20 @@ Copy ali's demon from `https://devrel.git.corp.google.com/libraries/gcm-go/` to 
 
 ## Usage from clients
 
-The current implementation is based on passing the protobuffers as base64 encoded strings inside the `base64` field of the message content.
-For example, in Objective C you can register a new client doing:
+From iOS Swift, this is how you register a new client:
 
 ```
-Client *thisApp = [[[[[Client builder] setName:@"pippo"]
-                        setRegistrationToken: _registrationToken]
-                        setProfilePictureUrl:@"profile.jpg"] build];
-
-RegisterNewClient *messagePayload = [[[RegisterNewClient builder] setClient:thisApp] build];
-FriendlyPingMessage *messageProto = [[[[FriendlyPingMessage builder]
-                                    setRncPayload:messagePayload]
-                                    setAction:ActionRegisterNewClient] build];
-NSDictionary *message = @{@"base64": [[messageProto data] base64EncodedStringWithOptions:0]};
-NSString *to = [NSString stringWithFormat:@"%@@gcm.googleapis.com", _gcmSenderID];
-NSString *messageId = [[NSProcessInfo processInfo] globallyUniqueString];
-[[GCMService sharedInstance] sendMessage: message to: to withId: messageId];
+let data = ["action": "register_new_client", "name": "Silvano", "registration_token": registrationToken!, "profile_picture_url": "profile.jpg"]
+var messageId = NSProcessInfo.processInfo().globallyUniqueString
+GCMService.sharedInstance().sendMessage(data, to: "\(gcmSenderID)@gcm.googleapis.com", withId: messageId)
 ```
 
-And receive the list of connected clients:
+To parse the list of clients sent by the server:
 
 ```
-- (void)application:(UIApplication *)application
-    didReceiveRemoteNotification:(NSDictionary *)userInfo {
-  //NSLog(@"Notification received: %@", userInfo);
-  NSData *data = [[NSData alloc] initWithBase64EncodedString:userInfo[@"base64"] options:0];
-  FriendlyPingMessage* message = [FriendlyPingMessage parseFromData:data];
-  NSLog(@"Received FP message: %@", message);
-  NSLog(@"Hello Steven Kan: %@", [message.sclPayload clientsAtIndex:2]);
+func application( application: UIApplication,
+    didReceiveRemoteNotification userInfo: [NSObject : AnyObject]) {
+  var clients = userInfo["clients"]!
+  println("Notification received: \(clients)")
 }
 ```
