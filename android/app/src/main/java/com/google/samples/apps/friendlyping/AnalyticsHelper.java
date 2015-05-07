@@ -23,6 +23,7 @@ import com.google.android.gms.analytics.GoogleAnalytics;
 import com.google.android.gms.analytics.HitBuilders;
 import com.google.android.gms.analytics.Logger;
 import com.google.android.gms.analytics.Tracker;
+import com.google.samples.apps.friendlyping.model.TrackingEvent;
 
 /**
  * Assisting with Analytics.

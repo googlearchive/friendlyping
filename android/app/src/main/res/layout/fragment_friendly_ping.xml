@@ -15,8 +15,8 @@
   -->
 
 <LinearLayout
-    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
@@ -28,23 +28,35 @@
         android:layout_width="match_parent"
         android:layout_height="@dimen/toolbar_height_double"
         android:background="@color/primary"
+        android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"
         app:elevation="@dimen/elevation_default"
-        app:popupTheme="@style/ThemeOverlay.AppCompat.Light"
-        android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar">
+        app:popupTheme="@style/ThemeOverlay.AppCompat.Light">
 
         <ImageView
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
             android:layout_gravity="top"
+            android:contentDescription="@string/app_name"
             android:paddingTop="@dimen/keyline_16"
             android:src="@drawable/logotype" />
     </android.support.v7.widget.Toolbar>
 
     <ListView
         android:id="@+id/ping_list"
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1" />
+
+    <TextView
+        android:id="@android:id/empty"
+        style="@style/Base.TextAppearance.AppCompat.Title"
+        android:layout_width="wrap_content"
+        android:layout_height="0dp"
+        android:layout_gravity="center"
+        android:layout_weight="1"
+        android:gravity="center"
+        android:text="@string/waiting_for_pingers"
+        android:textColor="@color/primary" />
 
     <com.google.android.gms.ads.AdView
         android:id="@+id/adView"

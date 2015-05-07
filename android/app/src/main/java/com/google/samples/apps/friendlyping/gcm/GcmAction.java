@@ -14,22 +14,17 @@
  * limitations under the License.
  */
 
-// Top-level build file where you can add configuration options common to all sub-projects/modules.
+package com.google.samples.apps.friendlyping.gcm;
 
-buildscript {
-    repositories {
-        jcenter()
-    }
-    dependencies {
-        classpath 'com.android.tools.build:gradle:1.2.2'
+/**
+ * The protocol for use with our server / other clients.
+ * These are being sent as keys within the JSON and indicate what the server / other client wants
+ * to tell this client.
+ */
+public class GcmAction {
 
-        // NOTE: Do not place your application dependencies here; they belong
-        // in the individual module build.gradle files
-    }
-}
-
-allprojects {
-    repositories {
-        jcenter()
-    }
+    public static final String REGISTER_NEW_CLIENT = "register_new_client";
+    public static final String BROADCAST_NEW_CLIENT = "broadcast_new_client";
+    public static final String SEND_CLIENT_LIST = "send_client_list";
+    public static final String PING_CLIENT = "ping_client";
 }

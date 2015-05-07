@@ -16,26 +16,18 @@
 
 package com.google.samples.apps.friendlyping;
 
-/**
- * Events that can be tracked via Google Analytics.
- */
-public enum TrackingEvent {
-    USER_LOGIN("User", "Login"),
-    USER_LOGOUT("User", "Logout");
+import android.annotation.TargetApi;
+import android.graphics.Outline;
+import android.os.Build;
+import android.view.View;
+import android.view.ViewOutlineProvider;
 
-    private String mCategory;
-    private String mAction;
+@TargetApi(Build.VERSION_CODES.LOLLIPOP)
+public class PingerOutlineProvider extends ViewOutlineProvider {
 
-    TrackingEvent(String category, String action) {
-        mCategory = category;
-        mAction = action;
-    }
-
-    public String getCategory() {
-        return mCategory;
-    }
-
-    public String getAction() {
-        return mAction;
+    @Override
+    public void getOutline(View view, Outline outline) {
+        final int size = view.getResources().getDimensionPixelSize(R.dimen.fab_size_normal);
+        outline.setOval(0, 0, size, size);
     }
 }

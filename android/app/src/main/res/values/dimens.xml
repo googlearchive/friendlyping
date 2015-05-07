@@ -16,6 +16,7 @@
 
 <resources>
     <!-- Default screen margins, per the Android Design guidelines. -->
+    <dimen name="keyline_8">8dp</dimen>
     <dimen name="keyline_16">16dp</dimen>
     <dimen name="toolbar_height">56dp</dimen>
     <dimen name="toolbar_height_double">112dp</dimen>
