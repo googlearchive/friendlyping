@@ -14,10 +14,12 @@ import (
 const (
 	newClientTopic     = "/topics/newclient"
 	actionKey          = "action"
+	senderKey          = "sender"
 	registerNewClient  = "register_new_client"
 	broadcastNewClient = "broadcast_new_client"
 	sendClientList     = "send_client_list"
 	pingClient         = "ping_client"
+	pingTitle          = "Friendly Ping!"
 )
 
 var (
@@ -25,6 +27,11 @@ var (
 	senderId = flag.String("senderId", "your_sender_id", "The sender id to identify the app on the GCM server")
 	testData = flag.String("testData", "", "Optional: test data to load (clients)")
 )
+
+// Standard format of the ping messages
+func createPingMessage(name string) string {
+	return fmt.Sprintf("%s is pinging you!", name)
+}
 
 // The friendly ping server
 type fpServer struct {
@@ -93,9 +100,19 @@ func (s *fpServer) sendClientList(c Client) error {
 }
 
 func (s *fpServer) pingClient(d gcm.Data) error {
-	client := d["client"].(Client)
-	notification := &gcm.Notification{Text: "Spock is pinging you!", Title: "Friendly Ping!"}
-	return gcm.Send(s.apiKey, gcm.Message{To: client.RegistrationToken, Data: gcm.Data{actionKey: pingClient}, Notification: *notification})
+	// This is a test ping, so we retrieve the information of the server from the client list
+	client := s.clients[s.getServerGcmAddress()]
+	// TODO(silvano): add note about the effect of sending the notification (I'm not clear about the android side)
+	notification := &gcm.Notification{Text: createPingMessage(client.Name), Title: "Friendly Ping!"}
+	senderVal, ok := d[senderKey]
+	if !ok {
+		return errors.New("Error parsing sender from ping message")
+	}
+	sender, ok := senderVal.(string)
+	if !ok {
+		return errors.New("Error parsing sender from ping message")
+	}
+	return gcm.Send(s.apiKey, gcm.Message{To: sender, Data: gcm.Data{actionKey: pingClient, senderKey: s.getServerGcmAddress()}, Notification: *notification})
 }
 
 // Transform the map of connected clients to an array of clients
@@ -120,14 +137,18 @@ func (s *fpServer) loadTestData() {
 	}
 }
 
+func (s *fpServer) getServerGcmAddress() string {
+	return fmt.Sprintf("%s@gcm.googleapis.com", s.senderId)
+}
+
 // Factory method for the fpServer
 func newServer(apiKey, senderId string) *fpServer {
 	s := &fpServer{apiKey: apiKey, senderId: senderId, clients: make(map[string]*Client)}
 	if *testData != "" {
 		s.loadTestData()
 	}
-	serverAddress := fmt.Sprintf("%s@gcm.googleapis.com", senderId)
-	s.clients[serverAddress] = &Client{"Spock", serverAddress, "http://www.startrek.com/legacy_media/images/200307/spock01/320x240.jpg"}
+	serverAddress := s.getServerGcmAddress()
+	s.clients[serverAddress] = &Client{"Larry", serverAddress, "https://lh3.googleusercontent.com/-Y86IN-vEObo/AAAAAAAAAAI/AAAAAAADO1I/QzjOGHq5kNQ/photo.jpg?sz=50"}
 	return s
 }
 
