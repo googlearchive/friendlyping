@@ -1,0 +1,23 @@
+apply plugin: 'application'
+
+version = '1.0'
+
+repositories {
+    maven {
+        url 'https://oss.sonatype.org/content/repositories/snapshots'
+    }
+    mavenCentral()
+}
+
+dependencies {
+    testCompile group: 'junit', name: 'junit', version: '4.11'
+    compile 'org.igniterealtime.smack:smack-core:4.1.0'
+    compile 'org.igniterealtime.smack:smack-java7:4.1.0'
+    compile 'org.igniterealtime.smack:smack-tcp:4.1.0'
+    compile 'org.igniterealtime.smack:smack-extensions:4.1.0'
+    compile 'com.google.code.gson:gson:2.3.1'
+    compile 'com.google.protobuf:protobuf-java:3.0.0-alpha-2'
+    compile 'com.googlecode.protobuf-java-format:protobuf-java-format:1.2'
+}
+
+mainClassName = 'com.gcm.samples.friendlyping.FriendlyPingServer'
