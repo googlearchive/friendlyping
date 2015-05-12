@@ -19,6 +19,12 @@
 
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission android:name="com.google.android.c2dm.permission.RECEIVE" />
+    <uses-permission android:name="android.permission.WAKE_LOCK" />
+
+    <permission
+        android:name="com.google.samples.apps.friendlyping.permission.C2D_MESSAGE"
+        android:protectionLevel="signature" />
 
     <application
         android:allowBackup="true"
@@ -33,10 +39,41 @@
             </intent-filter>
         </activity>
 
+        <!-- START gcm -->
+        <receiver
+            android:name="com.google.android.gms.gcm.GcmReceiver"
+            android:exported="true"
+            android:permission="com.google.android.c2dm.permission.SEND">
+            <intent-filter>
+                <action android:name="com.google.android.c2dm.intent.RECEIVE" />
+                <category android:name="com.google.samples.apps.friendlyping" />
+            </intent-filter>
+            <!-- For backward compatibility with devices without play services -->
+            <intent-filter>
+                <action android:name="com.google.android.c2dm.intent.REGISTRATION" />
+                <category android:name="com.google.samples.apps.friendlyping" />
+            </intent-filter>
+        </receiver>
+
+        <service
+            android:name="com.google.samples.apps.friendlyping.gcm.MyGcmListenerService"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="com.google.android.c2dm.intent.RECEIVE" />
+            </intent-filter>
+        </service>
+
+        <service
+            android:name="com.google.samples.apps.friendlyping.gcm.RegistrationIntentService"
+            android:exported="false">
+        </service>
+        <!-- END gcm -->
+
+        <!-- START ads -->
         <activity
             android:name="com.google.android.gms.ads.AdActivity"
             android:configChanges="keyboard|keyboardHidden|orientation|screenLayout|uiMode|screenSize|smallestScreenSize"
             android:theme="@android:style/Theme.Translucent" />
+        <!-- END ads -->
     </application>
-
 </manifest>

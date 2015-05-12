@@ -14,22 +14,20 @@
  * limitations under the License.
  */
 
-// Top-level build file where you can add configuration options common to all sub-projects/modules.
+package com.google.samples.apps.friendlyping.constants;
 
-buildscript {
-    repositories {
-        jcenter()
-    }
-    dependencies {
-        classpath 'com.android.tools.build:gradle:1.2.2'
+/**
+ * Containing the constants used to share registration states within the application.
+ */
+public class RegistrationConstants {
 
-        // NOTE: Do not place your application dependencies here; they belong
-        // in the individual module build.gradle files
-    }
-}
+    /**
+     * Indicates that the token has been sent to the server.
+     */
+    public static final String SENT_TOKEN_TO_SERVER = "sentTokenToServer";
+    /**
+     * Indicates that the registration with the server is complete.
+     */
+    public static final String REGISTRATION_COMPLETE = "registrationComplete";
 
-allprojects {
-    repositories {
-        jcenter()
-    }
 }

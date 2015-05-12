@@ -21,6 +21,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentSender;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.Menu;
@@ -36,8 +37,9 @@ import com.google.samples.apps.friendlyping.AnalyticsHelper;
 import com.google.samples.apps.friendlyping.R;
 import com.google.samples.apps.friendlyping.fragment.FriendlyPingFragment;
 import com.google.samples.apps.friendlyping.fragment.SignInFragment;
+import com.google.samples.apps.friendlyping.constants.RegistrationConstants;
 
-import static com.google.samples.apps.friendlyping.TrackingEvent.USER_LOGOUT;
+import static com.google.samples.apps.friendlyping.model.TrackingEvent.USER_LOGOUT;
 
 public class FriendlyPingActivity extends AppCompatActivity {
 
@@ -132,6 +134,8 @@ public class FriendlyPingActivity extends AppCompatActivity {
                 if (mGoogleApiClient.isConnected()) {
                     Plus.AccountApi.clearDefaultAccount(mGoogleApiClient);
                     mGoogleApiClient.disconnect();
+                    PreferenceManager.getDefaultSharedPreferences(this).edit().remove(
+                            RegistrationConstants.SENT_TOKEN_TO_SERVER).apply();
                 }
                 getSupportFragmentManager().beginTransaction()
                         .replace(R.id.fragment, getSignInFragment()).commit();
@@ -153,6 +157,7 @@ public class FriendlyPingActivity extends AppCompatActivity {
     private FriendlyPingFragment getFriendlyPingFragment() {
         if (null == mFriendlyPingFragment) {
             mFriendlyPingFragment = new FriendlyPingFragment();
+            mFriendlyPingFragment.setGoogleApiClient(mGoogleApiClient);
         }
         return mFriendlyPingFragment;
     }
@@ -164,8 +169,7 @@ public class FriendlyPingActivity extends AppCompatActivity {
             // onConnected indicates that an account was selected on the device, that the selected
             // account has granted any requested permissions to our app and that we were able to
             // establish a service connection to Google Play services.
-            Log.d(TAG, "onConnected:" + bundle);
-            // FIXME: 4/28/15 Show the signed-in UI
+            Log.d(TAG, "onConnected: " + bundle);
             mProgressView.setVisibility(View.GONE);
             mContentView.setVisibility(View.VISIBLE);
             getSupportFragmentManager().beginTransaction()

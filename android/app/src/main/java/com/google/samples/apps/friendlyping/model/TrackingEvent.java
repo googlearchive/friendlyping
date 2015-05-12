@@ -14,22 +14,29 @@
  * limitations under the License.
  */
 
-// Top-level build file where you can add configuration options common to all sub-projects/modules.
+package com.google.samples.apps.friendlyping.model;
 
-buildscript {
-    repositories {
-        jcenter()
+/**
+ * Events that can be tracked via Google Analytics.
+ */
+public enum TrackingEvent {
+    USER_LOGIN("User", "Login"),
+    USER_LOGOUT("User", "Logout"),
+    PING_SENT("Ping", "Sent");
+
+    private String mCategory;
+    private String mAction;
+
+    TrackingEvent(String category, String action) {
+        mCategory = category;
+        mAction = action;
     }
-    dependencies {
-        classpath 'com.android.tools.build:gradle:1.2.2'
 
-        // NOTE: Do not place your application dependencies here; they belong
-        // in the individual module build.gradle files
+    public String getCategory() {
+        return mCategory;
     }
-}
 
-allprojects {
-    repositories {
-        jcenter()
+    public String getAction() {
+        return mAction;
     }
 }

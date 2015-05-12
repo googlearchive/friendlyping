@@ -29,7 +29,7 @@ import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.samples.apps.friendlyping.AnalyticsHelper;
 import com.google.samples.apps.friendlyping.R;
 
-import static com.google.samples.apps.friendlyping.TrackingEvent.USER_LOGIN;
+import static com.google.samples.apps.friendlyping.model.TrackingEvent.USER_LOGIN;
 
 /**
  * A placeholder fragment containing a simple view.
