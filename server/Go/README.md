@@ -2,9 +2,13 @@ golang Friendly Ping
 --
 
 ## Installation
-Install the gcm demon:
-
-    $ go get -a github.com//aliafshar/gcm
+Copy the internal version of the GCM demon from `https://devrel.git.corp.google.com/libraries/gcm-go/`
+to `github.com/aliafshar/gcm` in the `src` folder of your `GOPATH`, and go get its dependencies
+(won't be needed when all the changes are published).
+    
+    $ cd $GOPATH
+    $ git clone sso://devrel/libraries/gcm-go src/github.com/aliafshar/gcm
+    $ go get -a github.com/mattn/go-xmpp
 
 
 ## Usage
