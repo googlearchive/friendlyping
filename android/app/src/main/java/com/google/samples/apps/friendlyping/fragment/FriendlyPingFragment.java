@@ -25,6 +25,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentActivity;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
@@ -60,24 +61,52 @@ import java.util.ArrayList;
 public class FriendlyPingFragment extends Fragment {
 
     private static final String TAG = "FriendlyPingFragment";
-    private GoogleApiClient mGoogleApiClient;
+    private static final String KEY_PINGERS = "key.pingers";
+
     private BroadcastReceiver mRegistrationBroadcastReceiver;
     private ListView mListView;
-    private ArrayList<Pinger> mPingers;
+    private AdapterView.OnItemClickListener mOnItemClickListener;
+    private GoogleApiClient mGoogleApiClient;
+    private SharedPreferences mDefaultSharedPreferences;
+    private PingerAdapter mPingerAdapter;
 
     public FriendlyPingFragment() {
-        /* no-op */
+        mOnItemClickListener = new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                if (mPingerAdapter.getItems() == null) {
+                    Log.w(TAG, "Pingers are not initialized, skipping send.");
+                    return;
+                }
+                Pinger pinger = mPingerAdapter.getItem(position);
+                pingSomeone(pinger);
+            }
+        };
     }
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setHasOptionsMenu(true);
+        final FragmentActivity activity = getActivity();
 
-        mRegistrationBroadcastReceiver = new PingerBroadcastReceiver();
+        mRegistrationBroadcastReceiver = new FriendlyPingBroadcastReceiver();
+        mDefaultSharedPreferences = PreferenceManager.getDefaultSharedPreferences(activity);
         // Start IntentService to register this application with GCM.
-        Intent service = new Intent(getActivity(), RegistrationIntentService.class);
-        getActivity().startService(service);
+        Intent service = new Intent(activity, RegistrationIntentService.class);
+        activity.startService(service);
+    }
+
+    @Override
+    public void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        if (mPingerAdapter == null) {
+            return;
+        }
+        ArrayList<Pinger> tmpItems = mPingerAdapter.getItems();
+        if (tmpItems != null) {
+            outState.putParcelableArrayList(KEY_PINGERS, tmpItems);
+        }
     }
 
     @Override
@@ -86,6 +115,8 @@ public class FriendlyPingFragment extends Fragment {
         final IntentFilter filter = new IntentFilter();
         filter.addAction(RegistrationConstants.REGISTRATION_COMPLETE);
         filter.addAction(GcmAction.SEND_CLIENT_LIST);
+        filter.addAction(GcmAction.BROADCAST_NEW_CLIENT);
+        filter.addAction(GcmAction.PING_CLIENT);
         // TODO: 5/7/15 add other implemented actions
         LocalBroadcastManager.getInstance(getActivity())
                 .registerReceiver(mRegistrationBroadcastReceiver, filter);
@@ -106,17 +137,23 @@ public class FriendlyPingFragment extends Fragment {
 
     @Override
     public void onViewCreated(View view, Bundle savedInstanceState) {
+        // Get the list view and set it up.
         mListView = (ListView) view.findViewById(R.id.ping_list);
-        mListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                final String pingerId = mPingers.get(position).getRegistrationToken();
-                pingSomeone(pingerId);
-            }
-        });
+        mListView.setOnItemClickListener(mOnItemClickListener);
         mListView.setEmptyView(view.findViewById(android.R.id.empty));
+
+        // Restore previously saved data.
+        if (savedInstanceState != null) {
+            ArrayList<Pinger> tmpPingers = savedInstanceState.getParcelableArrayList(KEY_PINGERS);
+            if (tmpPingers != null) {
+                mPingerAdapter = new PingerAdapter(view.getContext(), tmpPingers);
+                mListView.setAdapter(mPingerAdapter);
+            }
+        }
+
         final AppCompatActivity activity = (AppCompatActivity) getActivity();
         if (null != activity) {
+            // Setting the status bar color and Toolbar as ActionBar requires API 21+.
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
                 activity.setSupportActionBar((Toolbar) view.findViewById(R.id.toolbar_ping));
                 //noinspection ConstantConditions
@@ -125,34 +162,34 @@ public class FriendlyPingFragment extends Fragment {
                         getResources().getColor(R.color.primary_dark));
             }
         }
-
-        // TODO: 4/23/15 set adapter to display received pings
+        // [START show_ad]
         final String deviceId = getString(R.string.test_device_id);
         AdView adView = (AdView) view.findViewById(R.id.adView);
         AdRequest adRequest = new AdRequest.Builder().
                 addTestDevice(deviceId).build();
         adView.loadAd(adRequest);
+        // [END show_ad]
     }
 
     /**
-     * Pings another client
-     * @param registrationId The registration id of the client to ping.
+     * Ping another registered client
      */
-    private void pingSomeone(String registrationId) {
+    private void pingSomeone(Pinger pinger) {
+        final Context context = getActivity();
         Bundle data = new Bundle();
         data.putString(PingerKeys.ACTION, GcmAction.PING_CLIENT);
+        data.putString(PingerKeys.TO, pinger.getRegistrationToken());
+        data.putString(PingerKeys.SENDER,
+                mDefaultSharedPreferences.getString(RegistrationConstants.TOKEN, null));
         try {
-            final Context context = getActivity();
             GoogleCloudMessaging.getInstance(context)
-                    .send(registrationId, String.valueOf(System.currentTimeMillis()), data);
+                    .send(pinger.getRegistrationToken(), String.valueOf(System.currentTimeMillis()),
+                            data);
             AnalyticsHelper.send(context, TrackingEvent.PING_SENT);
         } catch (IOException e) {
             Log.w(TAG, "Could not ping client.", e);
         }
-    }
-
-    public void setGoogleApiClient(GoogleApiClient googleApiClient) {
-        mGoogleApiClient = googleApiClient;
+        mPingerAdapter.moveToTop(pinger);
     }
 
     @Override
@@ -163,19 +200,42 @@ public class FriendlyPingFragment extends Fragment {
     }
 
     /**
-     * The {@link BroadcastReceiver} that will receive broadcasts from Gcm and other pingers.
+     * Set the {@link GoogleApiClient} for this fragment to allow operations with it.
      */
-    private class PingerBroadcastReceiver extends BroadcastReceiver {
+    public void setGoogleApiClient(GoogleApiClient googleApiClient) {
+        mGoogleApiClient = googleApiClient;
+    }
+
+    /**
+     * Receive broadcasts from GCM and other pingers.
+     */
+
+    private class FriendlyPingBroadcastReceiver extends BroadcastReceiver {
+
+        private static final String TAG = "PingerBroadcastReceiver";
 
         @Override
         public void onReceive(Context context, Intent intent) {
-            switch (intent.getAction()) {
+            final String action = intent.getAction();
+            Log.d(TAG, "onReceive: " + action);
+            switch (action) {
                 case RegistrationConstants.REGISTRATION_COMPLETE:
                     handleRegistrationComplete(context);
                     break;
                 case GcmAction.SEND_CLIENT_LIST:
-                    mPingers = intent.getParcelableArrayListExtra(IntentExtras.PINGERS);
-                    mListView.setAdapter(new PingerAdapter(getActivity(), mPingers));
+                    final ArrayList<Pinger> tmpPingers = intent
+                            .getParcelableArrayListExtra(IntentExtras.PINGERS);
+                    if (mListView.getAdapter() == null) {
+                        mPingerAdapter = new PingerAdapter(getActivity(), tmpPingers);
+                        mListView.setAdapter(mPingerAdapter);
+                    }
+                    break;
+                case GcmAction.PING_CLIENT:
+                    // TODO: 5/13/15 move incoming pinger to top of the list
+                    break;
+                case GcmAction.BROADCAST_NEW_CLIENT:
+                    Pinger pinger = intent.getParcelableExtra(IntentExtras.NEW_PINGER);
+                    mPingerAdapter.addPinger(pinger);
                     break;
             }
         }

@@ -22,6 +22,7 @@ import android.content.Intent;
 import android.content.IntentSender;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
+import android.support.v4.app.Fragment;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.Menu;
@@ -35,9 +36,9 @@ import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.plus.Plus;
 import com.google.samples.apps.friendlyping.AnalyticsHelper;
 import com.google.samples.apps.friendlyping.R;
+import com.google.samples.apps.friendlyping.constants.RegistrationConstants;
 import com.google.samples.apps.friendlyping.fragment.FriendlyPingFragment;
 import com.google.samples.apps.friendlyping.fragment.SignInFragment;
-import com.google.samples.apps.friendlyping.constants.RegistrationConstants;
 
 import static com.google.samples.apps.friendlyping.model.TrackingEvent.USER_LOGOUT;
 
@@ -147,19 +148,33 @@ public class FriendlyPingActivity extends AppCompatActivity {
     }
 
     private SignInFragment getSignInFragment() {
+        // Only instantiate a new fragment if there's no old version available.
         if (null == mSignInFragment) {
-            mSignInFragment = new SignInFragment();
-            mSignInFragment.setGoogleApiClient(mGoogleApiClient);
+            if (getCurrentFragment() instanceof SignInFragment) {
+                mSignInFragment = (SignInFragment) getCurrentFragment();
+            } else {
+                mSignInFragment = new SignInFragment();
+                mSignInFragment.setGoogleApiClient(mGoogleApiClient);
+            }
         }
         return mSignInFragment;
     }
 
     private FriendlyPingFragment getFriendlyPingFragment() {
+        // Only instantiate a new fragment if there's no old version available.
         if (null == mFriendlyPingFragment) {
-            mFriendlyPingFragment = new FriendlyPingFragment();
-            mFriendlyPingFragment.setGoogleApiClient(mGoogleApiClient);
+            if (getCurrentFragment() instanceof FriendlyPingFragment) {
+                mFriendlyPingFragment = (FriendlyPingFragment) getCurrentFragment();
+            } else {
+                mFriendlyPingFragment = new FriendlyPingFragment();
+                mFriendlyPingFragment.setGoogleApiClient(mGoogleApiClient);
+            }
         }
         return mFriendlyPingFragment;
+    }
+
+    private Fragment getCurrentFragment() {
+        return getSupportFragmentManager().findFragmentById(R.id.fragment);
     }
 
     private GoogleApiClient.ConnectionCallbacks mConnectionCallbacks

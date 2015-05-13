@@ -32,35 +32,16 @@ import com.google.samples.apps.friendlyping.R;
 import static com.google.samples.apps.friendlyping.model.TrackingEvent.USER_LOGIN;
 
 /**
- * A placeholder fragment containing a simple view.
+ * Fragment taking care of signing in users.
  */
 public class SignInFragment extends Fragment {
 
     private static final String TAG = "SignInFragment";
+    private View.OnClickListener mOnClickListener;
     private GoogleApiClient mGoogleApiClient;
 
     public SignInFragment() {
-        /* no-op */
-    }
-
-    @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
-            Bundle savedInstanceState) {
-        final FragmentActivity activity = getActivity();
-        if (null != activity && Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-            activity.getWindow().setStatusBarColor(
-                    getResources().getColor(R.color.sign_in_status));
-        }
-        return inflater.inflate(R.layout.fragment_sign_in, container, false);
-    }
-
-    public void setGoogleApiClient(GoogleApiClient client) {
-        mGoogleApiClient = client;
-    }
-
-    @Override
-    public void onViewCreated(View view, Bundle savedInstanceState) {
-        view.findViewById(R.id.sign_in_button).setOnClickListener(new View.OnClickListener() {
+        mOnClickListener = new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 if (mGoogleApiClient == null) {
@@ -71,7 +52,32 @@ public class SignInFragment extends Fragment {
                     AnalyticsHelper.send(getActivity(), USER_LOGIN);
                 }
             }
-        });
+        };
+    }
+
+    @Override
+    public View onCreateView(LayoutInflater inflater, ViewGroup container,
+            Bundle savedInstanceState) {
+        final FragmentActivity activity = getActivity();
+
+        // Status bar colors can only be set on API 21+, so skip for lower API levels.
+        if (null != activity && Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            activity.getWindow().setStatusBarColor(
+                    getResources().getColor(R.color.sign_in_status));
+        }
+        return inflater.inflate(R.layout.fragment_sign_in, container, false);
+    }
+
+    @Override
+    public void onViewCreated(View view, Bundle savedInstanceState) {
+        view.findViewById(R.id.sign_in_button).setOnClickListener(mOnClickListener);
         super.onViewCreated(view, savedInstanceState);
+    }
+
+    /**
+     * Set the {@link GoogleApiClient} for this fragment to allow operations with it.
+     */
+    public void setGoogleApiClient(GoogleApiClient googleApiClient) {
+        mGoogleApiClient = googleApiClient;
     }
 }

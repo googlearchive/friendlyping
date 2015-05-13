@@ -180,7 +180,7 @@ public class FriendlyPingServer {
       JsonObject jSendClientList = new JsonObject();
 
       JsonObject jData = new JsonObject();
-      jData.addProperty("action", "sendClientList");
+      jData.addProperty("action", "send_client_list");
       jData.add("clients", clientElements);
 
       jSendClientList.add("data", jData);
@@ -211,6 +211,7 @@ public class FriendlyPingServer {
     jNotification.addProperty("body", senderClient.name + " is pinging you.");
     jNotification.addProperty("icon", PING_ICON);
     jNotification.addProperty("sound", "default");
+    jNotification.addProperty("click_action", "com.google.samples.apps.friendlyping.pingReceived");
 
     jPing.add("data", jData);
     jPing.add("notification", jNotification);

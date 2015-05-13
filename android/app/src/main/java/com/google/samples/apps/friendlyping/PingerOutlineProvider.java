@@ -22,6 +22,9 @@ import android.os.Build;
 import android.view.View;
 import android.view.ViewOutlineProvider;
 
+/**
+ * Provide round outlines to views.
+ */
 @TargetApi(Build.VERSION_CODES.LOLLIPOP)
 public class PingerOutlineProvider extends ViewOutlineProvider {
 

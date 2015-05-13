@@ -21,7 +21,7 @@ import android.content.Intent;
 import com.google.android.gms.iid.InstanceIDListenerService;
 
 /**
- * This service listens for changes of the instance id and forwards changes.
+ * Listen for changes of the instance id and forward them.
  */
 public class MyInstanceIDListenerService extends InstanceIDListenerService {
 

@@ -33,9 +33,16 @@
         android:theme="@style/AppTheme">
         <activity
             android:name=".activity.FriendlyPingActivity">
+            <!-- [START register_for_notification_clicks] -->
             <intent-filter>
+                <!-- [BEGIN_EXCLUDE] -->
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
+                <!-- [END_EXCLUDE] -->
+                <!-- Register for clicks on Notifications from GCM. -->
+                <action android:name="com.google.samples.apps.friendlyping.pingReceived" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <!-- [END register_for_notification_clicks] -->
             </intent-filter>
         </activity>
 

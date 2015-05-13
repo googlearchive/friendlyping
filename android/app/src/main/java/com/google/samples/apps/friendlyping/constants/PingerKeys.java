@@ -26,6 +26,8 @@ public class PingerKeys {
     public static final String NAME = "name";
     public static final String PICTURE_URL = "profile_picture_url";
     public static final String REGISTRATION_TOKEN = "registration_token";
-    public static final String ACTION = "action";
 
+    public static final String ACTION = "action";
+    public static final String SENDER = "sender";
+    public static final String TO = "to";
 }

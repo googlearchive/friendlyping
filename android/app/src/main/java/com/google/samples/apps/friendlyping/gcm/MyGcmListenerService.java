@@ -32,7 +32,7 @@ import org.json.JSONObject;
 import java.util.ArrayList;
 
 /**
- * This service listens for messages from Gcm, makes them usable for this application and then
+ * This service listens for messages from GCM, makes them usable for this application and then
  * sends them to their destination.
  */
 public class MyGcmListenerService extends GcmListenerService {
@@ -45,10 +45,14 @@ public class MyGcmListenerService extends GcmListenerService {
             Log.w(TAG, "Couldn't determine origin of message. Skipping.");
             return;
         }
-        digestData(data);
+        try {
+            digestData(data);
+        } catch (JSONException e) {
+            Log.e(TAG, "onMessageReceived: Could not digest data", e);
+        }
     }
 
-    private void digestData(Bundle data) {
+    private void digestData(Bundle data) throws JSONException {
         final String action = data.getString("action");
         Log.d(TAG, "Action: " + action);
         if (action == null) {
@@ -58,18 +62,15 @@ public class MyGcmListenerService extends GcmListenerService {
         Intent broadcastIntent = new Intent(action);
         switch (action) {
             case GcmAction.SEND_CLIENT_LIST:
-                try {
-                    final ArrayList<Pinger> pingers = getPingers(data);
-                    broadcastIntent.putParcelableArrayListExtra(IntentExtras.PINGERS, pingers);
-                } catch (JSONException e) {
-                    Log.e(TAG, "onMessageReceived: Could not load client list");
-                }
+                final ArrayList<Pinger> pingers = getPingers(data);
+                broadcastIntent.putParcelableArrayListExtra(IntentExtras.PINGERS, pingers);
                 break;
             case GcmAction.BROADCAST_NEW_CLIENT:
-                // TODO: 5/7/15 implement new client
+                Pinger pinger = getNewPinger(data);
+                broadcastIntent.putExtra(IntentExtras.NEW_PINGER, pinger);
                 break;
             case GcmAction.PING_CLIENT:
-                // TODO: 5/7/15 implement ping
+                // TODO: 5/7/15 implement ping client
                 break;
         }
         LocalBroadcastManager.getInstance(this).sendBroadcast(broadcastIntent);
@@ -83,5 +84,10 @@ public class MyGcmListenerService extends GcmListenerService {
             pingers.add(Pinger.fromJson(jsonPinger));
         }
         return pingers;
+    }
+
+    private Pinger getNewPinger(Bundle data) throws JSONException {
+        final JSONObject client = new JSONObject(data.getString("client"));
+        return Pinger.fromJson(client);
     }
 }

@@ -30,4 +30,5 @@ public class RegistrationConstants {
      */
     public static final String REGISTRATION_COMPLETE = "registrationComplete";
 
+    public static final String TOKEN = "token";
 }

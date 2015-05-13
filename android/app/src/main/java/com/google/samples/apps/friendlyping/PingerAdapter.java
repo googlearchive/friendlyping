@@ -29,19 +29,36 @@ import com.google.samples.apps.friendlyping.model.Pinger;
 
 import com.bumptech.glide.Glide;
 
-import java.util.List;
+import java.util.ArrayList;
 
 /**
- * Displays available {@link Pinger}s.
+ * Display available {@link Pinger}s.
  */
 public class PingerAdapter extends BaseAdapter {
 
-    private final List<Pinger> mPingers;
+    private final ArrayList<Pinger> mPingers;
     private final LayoutInflater mLayoutInflater;
 
-    public PingerAdapter(Context context, List<Pinger> pingers) {
+    public PingerAdapter(Context context, ArrayList<Pinger> pingers) {
         mPingers = pingers;
         mLayoutInflater = LayoutInflater.from(context);
+    }
+
+    /**
+     * Add a pinger to the list.
+     */
+    public void addPinger(Pinger pinger) {
+        mPingers.add(pinger);
+        notifyDataSetChanged();
+    }
+
+    /**
+     * Move a pinger to the top of the list.
+     */
+    public void moveToTop(Pinger pinger) {
+        mPingers.remove(pinger);
+        mPingers.add(0, pinger);
+        notifyDataSetChanged();
     }
 
     @Override
@@ -88,5 +105,9 @@ public class PingerAdapter extends BaseAdapter {
         }
         convertView.setTag(R.id.profile_picture, tmpProfilePicture);
         return convertView;
+    }
+
+    public ArrayList<Pinger> getItems() {
+        return mPingers;
     }
 }

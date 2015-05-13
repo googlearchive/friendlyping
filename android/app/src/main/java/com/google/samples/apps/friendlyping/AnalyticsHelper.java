@@ -26,14 +26,14 @@ import com.google.android.gms.analytics.Tracker;
 import com.google.samples.apps.friendlyping.model.TrackingEvent;
 
 /**
- * Assisting with Analytics.
+ * Assist with Analytics.
  */
 public class AnalyticsHelper {
 
     private static Tracker mTracker;
 
     /**
-     * Gets the default {@link Tracker} for this {@link Application}.
+     * Get the default {@link Tracker} for this {@link Application}.
      *
      * @return tracker
      */
@@ -48,7 +48,7 @@ public class AnalyticsHelper {
     }
 
     /**
-     * Easily send an {@link TrackingEvent} to Google Analytics.
+     * Send a single {@link TrackingEvent} to Google Analytics.
      *
      * @param event The event to send.
      */

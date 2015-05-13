@@ -37,7 +37,7 @@ import com.google.samples.apps.friendlyping.constants.RegistrationConstants;
 import java.io.IOException;
 
 /**
- * Registers the user with the GCM instance.
+ * Deal with registration of the user with the GCM instance.
  */
 public class RegistrationIntentService extends IntentService {
 
@@ -65,8 +65,10 @@ public class RegistrationIntentService extends IntentService {
                 // The list of topics we can subscribe to is being implemented within the server.
                 GcmPubSub.getInstance(this).subscribe(token, "/topics/newclient", null);
 
-                sharedPreferences.edit().putBoolean(RegistrationConstants.
-                        SENT_TOKEN_TO_SERVER, true).apply();
+                final SharedPreferences.Editor editor = sharedPreferences.edit();
+                editor.putBoolean(RegistrationConstants.SENT_TOKEN_TO_SERVER, true);
+                editor.putString(RegistrationConstants.TOKEN, token);
+                editor.apply();
             }
         } catch (IOException e) {
             Log.d(TAG, "Failed to complete token refresh", e);
