@@ -83,8 +83,8 @@ func (s *fpServer) registerNewClient(d gcm.Data) error {
 	}
 	client := &Client{name, registrationToken, profilePictureUrl}
 	s.clients.Lock()
-	defer s.clients.Unlock()
 	s.clients.c[client.RegistrationToken] = client
+	s.clients.Unlock()
 	err := s.broadcastNewClient(*client)
 	if err != nil {
 		// TODO(silvano): sshould panic and retry?
@@ -147,12 +147,12 @@ func (s *fpServer) pingClient(d gcm.Data) error {
 func (s *fpServer) getClientList() []*Client {
 	i := 0
 	s.clients.RLock()
-	defer s.clients.RUnlock()
 	cl := make([]*Client, len(s.clients.c))
 	for k := range s.clients.c {
 		cl[i] = s.clients.c[k]
 		i++
 	}
+	s.clients.RUnlock()
 	return cl
 }
 
