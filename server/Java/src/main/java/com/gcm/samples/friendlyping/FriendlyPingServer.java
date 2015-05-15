@@ -62,14 +62,15 @@ public class FriendlyPingServer {
     public void onMessage(String from, JsonObject jData) {
       if (jData.has("action")) {
         String action = jData.get("action").getAsString();
-        if (action.equals("register_new_client")) {
+        if (action.equals(REGISTER_NEW_CLIENT)) {
           registerNewClient(jData);
         } else if (action.equals("ping_client")) {
           String toToken = jData.get("to").getAsString();
           String senderToken = jData.get("sender").getAsString();
-          if (StringUtils.isNotEmpty(toToken) && StringUtils.isNotEmpty(senderToken) &&
-              clientMap.containsKey(toToken) && clientMap.containsKey(senderToken)) {
+          if (StringUtils.isNotEmpty(toToken) && StringUtils.isNotEmpty(senderToken)) {
             pingClient(toToken, senderToken);
+          } else {
+            logger.info("Unable to ping unless to and sender tokens are available.");
           }
         }
       } else {
@@ -82,8 +83,22 @@ public class FriendlyPingServer {
 
   private static final String SENDER_ID = "<SENDER_ID>";
   private static final String API_KEY = "<API_KEY>";
+
+  // Actions
+  private static final String REGISTER_NEW_CLIENT = "register_new_client";
+  private static final String BROADCAST_NEW_CLIENT = "broadcast_new_client";
+  private static final String SEND_CLIENT_LIST = "send_client_list";
+  private static final String PING_CLIENT = "ping_client";
+  // Keys
+  private static final String ACTION_KEY = "action";
+  private static final String CLIENT_KEY = "client";
+  private static final String CLIENTS_KEY = "clients";
+  private static final String DATA_KEY = "data";
+  private static final String SENDER_KEY = "sender";
+
   private static final String NEW_CLIENT_TOPIC = "/topics/newuser";
   private static final String PING_TITLE = "Friendly Ping!";
+  // TODO(arthurthompson): Use friendlyping notification notification icon here instead of launcher.
   private static final String PING_ICON = "mipmap/ic_launcher";
 
   public static final String SERVICE_NAME = "Friendly Ping Server";
@@ -92,9 +107,6 @@ public class FriendlyPingServer {
   private Map<String, Client> clientMap;
   // Listener responsible for handling incoming registrations and pings.
   private FriendlyGcmServer friendlyGcmServer;
-  // Fake Client is used to allow clients to send a test ping even if they do not have other
-  // Clients registered.
-  private Client fakeClient;
 
   // Gson helper to assist with going to and from JSON and Client.
   private Gson gson;
@@ -102,8 +114,8 @@ public class FriendlyPingServer {
   public FriendlyPingServer(String apiKey, String senderId) {
     clientMap = new ConcurrentHashMap<String, Client>();
 
-    initFakeClient();
-    clientMap.put(fakeClient.registrationToken, fakeClient);
+    Client serverClient = createServerClient();
+    clientMap.put(serverClient.registrationToken, serverClient);
 
     gson = new GsonBuilder().create();
 
@@ -111,14 +123,17 @@ public class FriendlyPingServer {
   }
 
   /**
-   * Set property values of FriendlyPingServer's fake client.
+   * Create a Client object to be used in responses to pings to the server.
+   *
+   * @return Server Client.
    */
-  private void initFakeClient() {
-    fakeClient = new Client();
-    fakeClient.name = "Larry";
-    fakeClient.registrationToken = SENDER_ID + "@gcm.googleapis.com";
-    fakeClient.profilePictureUrl =
+  private Client createServerClient() {
+    Client client = new Client();
+    client.name = "Larry";
+    client.registrationToken = SENDER_ID + "@gcm.googleapis.com";
+    client.profilePictureUrl =
         "https://lh3.googleusercontent.com/-Y86IN-vEObo/AAAAAAAAAAI/AAAAAAADO1I/QzjOGHq5kNQ/photo.jpg?sz=50";
+    return client;
   }
 
   /**
@@ -158,12 +173,12 @@ public class FriendlyPingServer {
     JsonObject jBroadcast = new JsonObject();
 
     JsonObject jData = new JsonObject();
-    jData.addProperty("action", "broadcast_new_client");
+    jData.addProperty(ACTION_KEY, BROADCAST_NEW_CLIENT);
 
     JsonObject jClient = gson.toJsonTree(client).getAsJsonObject();
-    jData.add("client", jClient);
+    jData.add(CLIENT_KEY, jClient);
 
-    jBroadcast.add("data", jData);
+    jBroadcast.add(DATA_KEY, jData);
     friendlyGcmServer.send(NEW_CLIENT_TOPIC, jBroadcast);
   }
 
@@ -180,10 +195,10 @@ public class FriendlyPingServer {
       JsonObject jSendClientList = new JsonObject();
 
       JsonObject jData = new JsonObject();
-      jData.addProperty("action", "send_client_list");
-      jData.add("clients", clientElements);
+      jData.addProperty(ACTION_KEY, SENDER_ID);
+      jData.add(CLIENTS_KEY, clientElements);
 
-      jSendClientList.add("data", jData);
+      jSendClientList.add(DATA_KEY, jData);
       friendlyGcmServer.send(client.registrationToken, jSendClientList);
     }
   }
@@ -196,24 +211,30 @@ public class FriendlyPingServer {
    * @param senderToken Token of sender of ping.
    */
   private void pingClient(String toToken, String senderToken) {
-    // TODO(arthurthompson): Check if toToken is fake client and if so send ping to sender.
-    Client senderClient = clientMap.get(senderToken);
+    Client senderClient;
+    // If the server is the recipient of the ping, send ping to sender, otherwise send ping to
+    // toToken.
+    if (toToken.equals(SENDER_ID + "@" + GcmServer.GCM_HOST)) {
+      senderClient = clientMap.get(toToken);
+      toToken = senderToken;
+    } else {
+      senderClient = clientMap.get(senderToken);
+    }
     JsonObject jPing = new JsonObject();
 
     JsonObject jData = new JsonObject();
-    jData.addProperty("action", "ping_client");
-    jData.addProperty("sender", senderClient.registrationToken);
+    jData.addProperty(ACTION_KEY, PING_CLIENT);
+    jData.addProperty(SENDER_KEY, senderClient.registrationToken);
 
+    // Create notification that is handled appropriately on the receiving platform.
     JsonObject jNotification = new JsonObject();
-    // title and body are required fields for Display Notifications on Android.
-    // TODO(arthurthompson): Comment on required fields for Chrome and iOS.
-    jNotification.addProperty("title", PING_TITLE);
     jNotification.addProperty("body", senderClient.name + " is pinging you.");
+    jNotification.addProperty("title", PING_TITLE);
     jNotification.addProperty("icon", PING_ICON);
     jNotification.addProperty("sound", "default");
     jNotification.addProperty("click_action", "com.google.samples.apps.friendlyping.pingReceived");
 
-    jPing.add("data", jData);
+    jPing.add(DATA_KEY, jData);
     jPing.add("notification", jNotification);
 
     friendlyGcmServer.send(toToken, jPing);
