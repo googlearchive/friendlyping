@@ -210,7 +210,7 @@ public abstract class GcmServer {
       }
     };
 
-    logger.info("sending: " + stanza);
+    logger.info("sending msg: " + stanza);
     smackCcsClient.sendStanza(stanza);
   }
 
@@ -235,6 +235,7 @@ public abstract class GcmServer {
       }
     };
 
+    logger.info("sending ack: " + stanza);
     smackCcsClient.sendStanza(stanza);
   }
 

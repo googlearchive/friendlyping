@@ -96,9 +96,7 @@ public class SmackCcsClient {
       // Connect and authenticate with to XMPP server (GCM CCS in this case).
       connection.connect();
       connection.login(username, apiKey);
-    } catch (SmackException e) {
-    } catch (IOException e) {
-    } catch (XMPPException e) {
+    } catch (SmackException | IOException | XMPPException e) {
       logger.log(Level.SEVERE, "Unable to connect or login to GCM CCS.", e);
     }
   }

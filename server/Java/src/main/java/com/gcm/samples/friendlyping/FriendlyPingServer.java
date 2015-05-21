@@ -195,7 +195,7 @@ public class FriendlyPingServer {
       JsonObject jSendClientList = new JsonObject();
 
       JsonObject jData = new JsonObject();
-      jData.addProperty(ACTION_KEY, SENDER_ID);
+      jData.addProperty(ACTION_KEY, SEND_CLIENT_LIST);
       jData.add(CLIENTS_KEY, clientElements);
 
       jSendClientList.add(DATA_KEY, jData);
