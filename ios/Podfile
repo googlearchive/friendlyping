@@ -1,0 +1,5 @@
+# FriendlyPing
+platform :ios, '7.0'
+link_with 'FriendlyPing', 'FriendlyPingSwift'
+source 'sso://cpdc-eap/spec.git'
+pod 'Google/CloudMessaging'
