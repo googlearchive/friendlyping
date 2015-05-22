@@ -30,11 +30,10 @@ public class MyInstanceIDListenerService extends InstanceIDListenerService {
      * the previous token had been compromised. This call is initiated by the
      * InstanceID provider.
      *
-     * @param updateID If true a new InstanceID is issued. If false only the token
-     * has been updated.
      */
     @Override
-    public void onTokenRefresh(boolean updateID) {
+    public void onTokenRefresh() {
+        super.onTokenRefresh();
         // Fetch updated Instance ID token and notify our app's server of any changes
         // (if applicable).
         Intent intent = new Intent(this, RegistrationIntentService.class);
