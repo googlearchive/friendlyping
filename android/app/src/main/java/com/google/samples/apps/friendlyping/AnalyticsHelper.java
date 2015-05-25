@@ -42,7 +42,7 @@ public class AnalyticsHelper {
             GoogleAnalytics analytics = GoogleAnalytics
                     .getInstance(context.getApplicationContext());
             analytics.getLogger().setLogLevel(Logger.LogLevel.VERBOSE);
-            mTracker = analytics.newTracker(R.xml.tracker);
+            mTracker = analytics.newTracker(R.xml.global_tracker);
         }
         return mTracker;
     }

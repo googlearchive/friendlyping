@@ -19,3 +19,4 @@ build/
 .DS_Store
 /captures
 *.iml
+app/google-services.json
