@@ -163,10 +163,8 @@ public class FriendlyPingFragment extends Fragment {
             }
         }
         // [START show_ad]
-        final String deviceId = getString(R.string.test_device_id);
         AdView adView = (AdView) view.findViewById(R.id.adView);
-        AdRequest adRequest = new AdRequest.Builder().
-                addTestDevice(deviceId).build();
+        AdRequest adRequest = new AdRequest.Builder().build();
         adView.loadAd(adRequest);
         // [END show_ad]
     }
