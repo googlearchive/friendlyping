@@ -75,26 +75,61 @@ class ViewController: UIViewController {
   }
 
   func didReceiveNewClient(userInfo: [NSObject: AnyObject]) {
-    // TODO(silvano): dedup if self, add to clients otherwise
-    if let client = userInfo["client"] as? String {
-      println("New client\(client)")
+    if let
+      clientString = userInfo["client"] as? String,
+      clientData:NSData = clientString.dataUsingEncoding(NSUTF8StringEncoding)
+    {
+      var jsonError: NSError?
+      let client = NSJSONSerialization.JSONObjectWithData(clientData, options: nil,
+          error: &jsonError) as! NSDictionary
+      if jsonError != nil {
+        println("Could not read new client: \(jsonError)")
+      } else {
+        if let
+          name = client["name"] as? String,
+          registrationToken = client["registration_token"] as? String,
+          profilePictureUrl = client["profile_picture_url"] as? String
+        {
+          if registrationToken != self.registrationToken {
+            var c = FriendlyPingClient(name:name, registrationToken:registrationToken,
+              profilePictureUrl: NSURL(string: profilePictureUrl))
+            self.clients.append(c)
+          }
+        }
+      }
     } else {
       println("Invalid payload for new client action")
     }
   }
 
   func didReceiveClientList(userInfo: [NSObject: AnyObject]) {
-    // TODO(silvano): initialize clients
     if let clientsString = userInfo["clients"] as? String {
       if let clientsData:NSData = clientsString.dataUsingEncoding(NSUTF8StringEncoding) {
         var jsonError: NSError?
         let clients = NSJSONSerialization.JSONObjectWithData(clientsData, options: nil,
           error: &jsonError) as! NSArray
-        for client in clients {
-          if client["name"] as! String == "Larry" {
-            let data = ["action": "ping_client", "to": self.serverAddress!, "sender": self.registrationToken!]
-            var messageId = NSProcessInfo.processInfo().globallyUniqueString
-            GCMService.sharedInstance().sendMessage(data, to: self.serverAddress!, withId: messageId)
+        if jsonError != nil {
+          println("Could not read client list: \(jsonError)")
+        } else {
+          for client in clients {
+            if let
+              name = client["name"] as? String,
+              registrationToken = client["registration_token"] as? String,
+              profilePictureUrl = client["profile_picture_url"] as? String
+            {
+              // don't add self to the clients list
+              if registrationToken != self.registrationToken {
+                var c = FriendlyPingClient(name:name, registrationToken:registrationToken,
+                    profilePictureUrl: NSURL(string: profilePictureUrl))
+                self.clients.append(c)
+              }
+              // TODO(silvano): remove the test ping when the UI lands
+              if client["name"] as! String == "Larry" {
+                let data = ["action": "ping_client", "to": self.serverAddress!, "sender": self.registrationToken!]
+                var messageId = NSProcessInfo.processInfo().globallyUniqueString
+                GCMService.sharedInstance().sendMessage(data, to: self.serverAddress!, withId: messageId)
+              }
+            }
           }
         }
       }
@@ -102,19 +137,27 @@ class ViewController: UIViewController {
   }
 
   func didReceivePing(message: [NSObject: AnyObject]) {
-    // TODO(silvano): move sender to top in client list
     if let
         aps = message["aps"] as? [String: AnyObject],
         alert = aps["alert"] as? [String: String]!,
         title = alert["title"] as String!,
-        body  = alert["body"] as String!
+        body  = alert["body"] as String!,
+        sender = message["sender"] as? String
       {
+        for (index, value) in enumerate(self.clients) {
+          if value.registrationToken! == sender {
+            var senderObject = self.clients[index]
+            self.clients.removeAtIndex(index)
+            self.clients.insert(senderObject, atIndex: 0)
+          }
+        }
         showAlert(title, message: body)
       } else {
         println("Error decoding received ping")
       }
   }
 
+  // TODO(silvano) add addClient func to remove dup code
   func showAlert(title:String, message:String) {
     let alert = UIAlertController(title: title,
       message: message, preferredStyle: .Alert)

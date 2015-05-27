@@ -72,10 +72,10 @@ class AppDelegate: UIResponder, UIApplicationDelegate, GCMReceiverDelegate {
 
   func application( application: UIApplication, didRegisterForRemoteNotificationsWithDeviceToken
     deviceToken: NSData ) {
-      GMSInstanceID.sharedInstance().startWithConfig(GMSInstanceIDConfig.defaultConfig())
-      var registrationOptions = [kGMSInstanceIDRegisterAPNSOption:deviceToken,
-        kGMSInstanceIDAPNSServerTypeSandboxOption:true]
-      GMSInstanceID.sharedInstance().tokenWithAuthorizedEntity(gcmSenderID, scope: kGMSInstanceIDScopeGCM,
+      GGLInstanceID.sharedInstance().startWithConfig(GGLInstanceIDConfig.defaultConfig())
+      var registrationOptions = [kGGLInstanceIDRegisterAPNSOption:deviceToken,
+        kGGLInstanceIDAPNSServerTypeSandboxOption:true]
+      GGLInstanceID.sharedInstance().tokenWithAuthorizedEntity(gcmSenderID, scope: kGGLInstanceIDScopeGCM,
         options: registrationOptions, handler: registrationHandler)
   }
 
