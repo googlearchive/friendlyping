@@ -6,6 +6,9 @@ messages are sent and received via CCS.
 ##Build
 ./gradlew build
 
+In `FriendlyPingServer.java`, replace the `<SENDER_ID>` and `<API_KEY>` placeholders with the values
+for your project. 
+
 ##Run
 ./gradlew run
 

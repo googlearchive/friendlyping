@@ -24,8 +24,10 @@ import com.google.gson.annotations.SerializedName;
 import com.google.gson.reflect.TypeToken;
 import org.jivesoftware.smack.util.StringUtils;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CountDownLatch;
 import java.util.logging.Level;
@@ -81,8 +83,10 @@ public class FriendlyPingServer {
 
   private static final Logger logger = Logger.getLogger("FriendlyPingServer");
 
-  private static final String SENDER_ID = "<SENDER_ID>";
-  private static final String API_KEY = "<API_KEY>";
+  //private static final String SENDER_ID = "<SENDER_ID>";
+  //private static final String API_KEY = "<API_KEY>";
+  private static final String SENDER_ID = "1015367374593";
+  private static final String API_KEY = "AIzaSyCFVrvWMv0ueY0-wN_RWK_OJ_FmcgkoF_I";
 
   // Actions
   private static final String REGISTER_NEW_CLIENT = "register_new_client";
@@ -189,7 +193,14 @@ public class FriendlyPingServer {
    * @param client Newly registered client.
    */
   private void sendClientList(Client client) {
-    JsonElement clientElements = gson.toJsonTree(clientMap.values(),
+    ArrayList<Client> clientList = new ArrayList();
+    for (Entry<String, Client> clientEntry : clientMap.entrySet()) {
+      Client currentClient = clientEntry.getValue();
+      if (currentClient.registrationToken != client.registrationToken) {
+        clientList.add(currentClient);
+      }
+    }
+    JsonElement clientElements = gson.toJsonTree(clientList,
         new TypeToken<Collection<Client>>() {}.getType());
     if (clientElements.isJsonArray()) {
       JsonObject jSendClientList = new JsonObject();

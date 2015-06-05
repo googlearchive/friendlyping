@@ -13,10 +13,17 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 //
-//  Use this file to import your target's public headers that you would like to expose to Swift.
-//
 
-#import <Google/CloudMessaging.h>
-#import <Google/SignIn.h>
-#import <Google/AdMob.h>
-#import <Google/Analytics.h>
+class AppState: NSObject {
+
+  static let sharedInstance = AppState()
+
+  var connectedToGcm = false
+  var subscribed = false
+  var registrationToken: String?
+  var senderID: String?
+  var serverAddress: String?
+  var registeredToFP = false
+  var signedIn = false
+
+}

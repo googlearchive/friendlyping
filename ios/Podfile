@@ -1,5 +1,7 @@
 # FriendlyPing
-platform :ios, '7.0'
+platform :ios, '8.0'
 link_with 'FriendlyPing', 'FriendlyPingSwift'
-source 'sso://cpdc-eap/spec.git'
 pod 'Google/CloudMessaging'
+pod 'Google/SignIn'
+pod 'Google/AdMob'
+pod 'Google/Analytics'

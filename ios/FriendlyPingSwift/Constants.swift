@@ -13,10 +13,20 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 //
-//  Use this file to import your target's public headers that you would like to expose to Swift.
-//
 
-#import <Google/CloudMessaging.h>
-#import <Google/SignIn.h>
-#import <Google/AdMob.h>
-#import <Google/Analytics.h>
+struct Constants {
+  struct GCMStrings {
+    static let Topic = "/topics/newclient"
+  }
+
+  struct NotificationKeys {
+    static let SignedIn = "onSignInCompleted"
+    static let Registration = "onRegistrationCompleted"
+    static let Message = "onMessageReceived"
+  }
+
+  struct Segues {
+    static let SignInToFp = "SignInToFP"
+    static let FpToSignIn = "FPToSignIn"
+  }
+}

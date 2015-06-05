@@ -16,13 +16,13 @@
 
 import UIKit
 
-@objc(ViewController)
-class ViewController: UIViewController {
+@objc(FPViewController)
+class FPViewController: UIViewController, UITableViewDelegate {
 
-  var clients : Array <FriendlyPingClient> = []
-  var registrationToken : String?
-  var serverAddress : String?
-
+  @IBOutlet weak var banner: GADBannerView!
+  @IBOutlet weak var clientTable: UITableView!
+  @IBOutlet var clients: ClientListDataSource!
+  
   enum Actions : String {
     case BroadcastNewClient = "broadcast_new_client"
     case SendClientList = "send_client_list"
@@ -31,28 +31,11 @@ class ViewController: UIViewController {
 
   override func viewDidLoad() {
     super.viewDidLoad()
-    let appDelegate = UIApplication.sharedApplication().delegate as! AppDelegate
-    NSNotificationCenter.defaultCenter().addObserver(self, selector: "updateRegistrationStatus:",
-      name: appDelegate.registrationKey, object: nil)
     NSNotificationCenter.defaultCenter().addObserver(self, selector: "receiveMessage:",
-      name: appDelegate.messageKey, object: nil)
-  }
-
-  func updateRegistrationStatus(notification: NSNotification) {
-    // TODO(silvano): could this be a switch?
-    if let info = notification.userInfo as? Dictionary<String,String> {
-      if let error = info["error"] {
-        showAlert("Error", message: error)
-      } else if let registrationToken = info["registrationToken"] {
-        self.registrationToken = registrationToken
-        let appDelegate = UIApplication.sharedApplication().delegate as! AppDelegate
-        self.serverAddress = "\(appDelegate.gcmSenderID!)@gcm.googleapis.com"
-      } else {
-        guruMeditation()
-      }
-    } else {
-      guruMeditation()
-    }
+      name:Constants.NotificationKeys.Message, object: nil)
+    self.banner.adUnitID = GGLContext.sharedInstance().adUnitIDForBannerTest
+    self.banner.rootViewController = self
+    self.banner.loadRequest(GADRequest())
   }
 
   func receiveMessage(notification: NSNotification) {
@@ -90,10 +73,11 @@ class ViewController: UIViewController {
           registrationToken = client["registration_token"] as? String,
           profilePictureUrl = client["profile_picture_url"] as? String
         {
-          if registrationToken != self.registrationToken {
+          if registrationToken != AppState.sharedInstance.registrationToken {
             var c = FriendlyPingClient(name:name, registrationToken:registrationToken,
               profilePictureUrl: NSURL(string: profilePictureUrl))
-            self.clients.append(c)
+            self.clients.addClient(c)
+            clientTable.reloadData()
           }
         }
       }
@@ -117,20 +101,12 @@ class ViewController: UIViewController {
               registrationToken = client["registration_token"] as? String,
               profilePictureUrl = client["profile_picture_url"] as? String
             {
-              // don't add self to the clients list
-              if registrationToken != self.registrationToken {
                 var c = FriendlyPingClient(name:name, registrationToken:registrationToken,
                     profilePictureUrl: NSURL(string: profilePictureUrl))
-                self.clients.append(c)
-              }
-              // TODO(silvano): remove the test ping when the UI lands
-              if client["name"] as! String == "Larry" {
-                let data = ["action": "ping_client", "to": self.serverAddress!, "sender": self.registrationToken!]
-                var messageId = NSProcessInfo.processInfo().globallyUniqueString
-                GCMService.sharedInstance().sendMessage(data, to: self.serverAddress!, withId: messageId)
-              }
+                self.clients.addClient(c)
             }
           }
+          clientTable.reloadData()
         }
       }
     }
@@ -146,9 +122,8 @@ class ViewController: UIViewController {
       {
         for (index, value) in enumerate(self.clients) {
           if value.registrationToken! == sender {
-            var senderObject = self.clients[index]
-            self.clients.removeAtIndex(index)
-            self.clients.insert(senderObject, atIndex: 0)
+            self.clients.moveToTop(index)
+            clientTable.reloadData()
           }
         }
         showAlert(title, message: body)
@@ -157,13 +132,36 @@ class ViewController: UIViewController {
       }
   }
 
-  // TODO(silvano) add addClient func to remove dup code
+  func tableView(tableView: UITableView, didSelectRowAtIndexPath indexPath: NSIndexPath) {
+    var index = indexPath.row
+    var c = clients[index]
+    showAlert("Sending Ping!", message: "Pinging \(c.name!)")
+    let data = ["action": "ping_client", "to": c.registrationToken!,
+        "sender": AppState.sharedInstance.registrationToken!]
+    var messageId = NSProcessInfo.processInfo().globallyUniqueString
+    GCMService.sharedInstance().sendMessage(data, to: AppState.sharedInstance.serverAddress!,
+        withId: messageId)
+    GAI.sharedInstance().defaultTracker.send(GAIDictionaryBuilder.createEventWithCategory(
+      "Ping", action: "Sent", label: nil, value: nil).build() as [NSObject:AnyObject]!)
+    clients.moveToTop(index)
+    clientTable.reloadData()
+  }
+
+  @IBAction func signOut(sender: UIButton) {
+    GIDSignIn.sharedInstance().signOut()
+    AppState.sharedInstance.registeredToFP = false
+    performSegueWithIdentifier(Constants.Segues.FpToSignIn, sender: nil)
+
+  }
+
   func showAlert(title:String, message:String) {
-    let alert = UIAlertController(title: title,
-      message: message, preferredStyle: .Alert)
-    let dismissAction = UIAlertAction(title: "Dismiss", style: .Destructive, handler: nil)
-    alert.addAction(dismissAction)
-    self.presentViewController(alert, animated: true, completion: nil)
+    dispatch_async(dispatch_get_main_queue()) {
+      let alert = UIAlertController(title: title,
+        message: message, preferredStyle: .Alert)
+      let dismissAction = UIAlertAction(title: "Dismiss", style: .Destructive, handler: nil)
+      alert.addAction(dismissAction)
+      self.presentViewController(alert, animated: true, completion: nil)
+    }
   }
 
   func guruMeditation() {

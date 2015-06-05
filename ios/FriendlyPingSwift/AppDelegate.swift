@@ -17,39 +17,70 @@
 import UIKit
 
 @UIApplicationMain
-class AppDelegate: UIResponder, UIApplicationDelegate, GCMReceiverDelegate {
+class AppDelegate: UIResponder, UIApplicationDelegate, GIDSignInDelegate, GCMReceiverDelegate {
 
   var window: UIWindow?
-  var connectedToGcm = false
-  var subscribed = false
-  var registeredToFP = false
-  var registrationToken: String?
-  var gcmSenderID: String?
-  var topic = "/topics/newclient"
-
-  let registrationKey = "onRegistrationCompleted"
-  let messageKey = "onMessageReceived"
 
   func application(application: UIApplication, didFinishLaunchingWithOptions
       launchOptions: [NSObject: AnyObject]?) -> Bool {
+    configureGGLContext()
+    configureGCMService()
+    registerForRemoteNotifications(application)
+    return true
+  }
+
+  func configureGGLContext() {
     var configureError:NSError?
     GGLContext.sharedInstance().configureWithError(&configureError)
     if configureError != nil {
       println("Error configuring the Google context: \(configureError)")
     }
-    gcmSenderID = GGLContext.sharedInstance().configuration.gcmSenderID
-    var types: UIUserNotificationType = UIUserNotificationType.Badge |
-        UIUserNotificationType.Alert |
-        UIUserNotificationType.Sound
-    var settings: UIUserNotificationSettings =
-    UIUserNotificationSettings( forTypes: types, categories: nil )
-    application.registerUserNotificationSettings(settings)
-    application.registerForRemoteNotifications()
+    GIDSignIn.sharedInstance().delegate = self
+    let senderID = GGLContext.sharedInstance().configuration.gcmSenderID
+    AppState.sharedInstance.senderID = senderID
+    AppState.sharedInstance.serverAddress = "\(senderID)@gcm.googleapis.com"
+  }
+
+  func configureGCMService() {
     var config = GCMConfig.defaultConfig()
     config.receiverDelegate = self
     config.logLevel = GCMLogLevel.Debug
     GCMService.sharedInstance().startWithConfig(config)
-    return true
+  }
+
+  func registerForRemoteNotifications(application: UIApplication) {
+    var types: UIUserNotificationType = UIUserNotificationType.Badge |
+      UIUserNotificationType.Alert |
+      UIUserNotificationType.Sound
+    var settings: UIUserNotificationSettings =
+    UIUserNotificationSettings( forTypes: types, categories: nil )
+    application.registerUserNotificationSettings(settings)
+    application.registerForRemoteNotifications()
+  }
+
+  func application(application: UIApplication,
+      openURL url: NSURL, sourceApplication: String?, annotation: AnyObject?) -> Bool {
+    return GIDSignIn.sharedInstance().handleURL(url, sourceApplication: sourceApplication,
+        annotation: annotation)
+  }
+
+  func signIn(signIn: GIDSignIn!, didSignInForUser user: GIDGoogleUser!,
+      withError error: NSError!) {
+    if (error == nil) {
+      AnalyticsHelper.sendLoginEvent()
+      AppState.sharedInstance.signedIn = true
+      connectToFriendlyPing()
+      NSNotificationCenter.defaultCenter().postNotificationName(Constants.NotificationKeys.SignedIn,
+        object: nil, userInfo: nil)
+    } else {
+      println("\(error.localizedDescription)")
+    }
+  }
+
+  func signIn(signIn: GIDSignIn!, didDisconnectWithUser user:GIDGoogleUser!,
+      withError error: NSError!) {
+    AppState.sharedInstance.signedIn = false
+    AppState.sharedInstance.registeredToFP = false
   }
 
   func applicationDidBecomeActive( application: UIApplication) {
@@ -59,7 +90,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, GCMReceiverDelegate {
         println("Could not connect to GCM: \(error.localizedDescription)")
       } else {
         println("Connected to GCM")
-        self.connectedToGcm = true
+        AppState.sharedInstance.connectedToGcm = true
         self.connectToFriendlyPing()
       }
     })
@@ -67,82 +98,105 @@ class AppDelegate: UIResponder, UIApplicationDelegate, GCMReceiverDelegate {
 
   func applicationDidEnterBackground(application: UIApplication) {
     GCMService.sharedInstance().disconnect()
-    self.connectedToGcm = false
+    AppState.sharedInstance.connectedToGcm = false
   }
 
   func application( application: UIApplication, didRegisterForRemoteNotificationsWithDeviceToken
-    deviceToken: NSData ) {
-      GGLInstanceID.sharedInstance().startWithConfig(GGLInstanceIDConfig.defaultConfig())
-      var registrationOptions = [kGGLInstanceIDRegisterAPNSOption:deviceToken,
+      deviceToken: NSData ) {
+    GGLInstanceID.sharedInstance().startWithConfig(GGLInstanceIDConfig.defaultConfig())
+    var registrationOptions = [kGGLInstanceIDRegisterAPNSOption:deviceToken,
         kGGLInstanceIDAPNSServerTypeSandboxOption:true]
-      GGLInstanceID.sharedInstance().tokenWithAuthorizedEntity(gcmSenderID, scope: kGGLInstanceIDScopeGCM,
-        options: registrationOptions, handler: registrationHandler)
+    GGLInstanceID.sharedInstance().tokenWithAuthorizedEntity(AppState.sharedInstance.senderID,
+        scope: kGGLInstanceIDScopeGCM, options: registrationOptions, handler: registrationHandler)
   }
 
   func application( application: UIApplication, didFailToRegisterForRemoteNotificationsWithError
-    error: NSError ) {
-      println("Registration for remote notification failed with error: \(error.localizedDescription)")
-      let userInfo = ["error": error.localizedDescription]
-      NSNotificationCenter.defaultCenter().postNotificationName(
-        registrationKey, object: nil, userInfo: userInfo)
+      error: NSError ) {
+    println("Registration for remote notification failed with error: \(error.localizedDescription)")
+    let userInfo = ["error": error.localizedDescription]
+    NSNotificationCenter.defaultCenter().postNotificationName(
+        Constants.NotificationKeys.Registration, object: nil, userInfo: userInfo)
   }
 
   func registrationHandler(registrationToken: String!, error: NSError!) {
     if (registrationToken != nil) {
-      self.registrationToken = registrationToken;
+      AppState.sharedInstance.registrationToken = registrationToken;
       connectToFriendlyPing()
       let userInfo = ["registrationToken": registrationToken]
       NSNotificationCenter.defaultCenter().postNotificationName(
-        self.registrationKey, object: nil, userInfo: userInfo)
+        Constants.NotificationKeys.Registration, object: nil, userInfo: userInfo)
     } else {
       println("Registration to GCM failed with error: \(error.localizedDescription)")
       let userInfo = ["error": error.localizedDescription]
       NSNotificationCenter.defaultCenter().postNotificationName(
-        self.registrationKey, object: nil, userInfo: userInfo)
+        Constants.NotificationKeys.Registration, object: nil, userInfo: userInfo)
     }
   }
 
   func application( application: UIApplication,
-    didReceiveRemoteNotification userInfo: [NSObject : AnyObject]) {
-      GCMService.sharedInstance().appDidReceiveMessage(userInfo);
-      NSNotificationCenter.defaultCenter().postNotificationName(
-        self.messageKey, object: nil, userInfo: userInfo)
+      didReceiveRemoteNotification userInfo: [NSObject : AnyObject]) {
+    GCMService.sharedInstance().appDidReceiveMessage(userInfo);
+    NSNotificationCenter.defaultCenter().postNotificationName(
+        Constants.NotificationKeys.Message, object: nil, userInfo: userInfo)
+  }
+
+  func application( application: UIApplication,
+      didReceiveRemoteNotification userInfo: [NSObject : AnyObject],
+      fetchCompletionHandler handler: (UIBackgroundFetchResult) -> Void) {
+    GCMService.sharedInstance().appDidReceiveMessage(userInfo);
+    NSNotificationCenter.defaultCenter().postNotificationName(
+        Constants.NotificationKeys.Message, object: nil, userInfo: userInfo)
+    handler(UIBackgroundFetchResult.NoData);
   }
 
   func connectToFriendlyPing() {
-    if connectedToGcm && registrationToken != nil {
+    if AppState.sharedInstance.connectedToGcm && AppState.sharedInstance.signedIn &&
+        AppState.sharedInstance.registrationToken != nil {
       subscribeToTopic()
       registerToFriendlyPing()
     }
   }
 
   func subscribeToTopic() {
-    if !subscribed {
-      GCMPubSub().subscribeWithToken(registrationToken!, topic: topic, options: nil, handler: {
-          (NSError error) -> Void in
-        if (error != nil) {
-          // TODO(silvano): should this be more fatal? is the library retrying automatically?
-          println("Error subscribing: \(error)")
-          println("Topic subscription failed with error: \(error.localizedDescription)")
-          let userInfo = ["error": error.localizedDescription]
-          NSNotificationCenter.defaultCenter().postNotificationName(
-            self.registrationKey, object: nil, userInfo: userInfo)
-        } else {
-          self.subscribed = true
-        }
+    if !AppState.sharedInstance.subscribed {
+      GCMPubSub().subscribeWithToken(AppState.sharedInstance.registrationToken!,
+          topic: Constants.GCMStrings.Topic, options: nil, handler: {
+            (NSError error) -> Void in
+              if (error != nil) {
+                // TODO(silvano): treat already subscribed with more grace
+                println("Error subscribing: \(error)")
+                println("Topic subscription failed with error: \(error.localizedDescription)")
+                let userInfo = ["error": error.localizedDescription]
+                NSNotificationCenter.defaultCenter().postNotificationName(
+                  Constants.NotificationKeys.Registration, object: nil, userInfo: userInfo)
+              } else {
+                AppState.sharedInstance.subscribed = true
+              }
       })
     }
   }
 
   func registerToFriendlyPing() {
-    if !registeredToFP {
-      let data = ["action": "register_new_client", "name": "Silvano",
-          "registration_token": self.registrationToken!, "profile_picture_url": "profile.jpg"]
-      var messageId = NSProcessInfo.processInfo().globallyUniqueString
-      GCMService.sharedInstance().sendMessage(data, to: "\(self.gcmSenderID!)@gcm.googleapis.com",
-          withId: messageId)
-      // TODO(silvano): should we set this upon reception of the client list?
-      registeredToFP = true
+    if !AppState.sharedInstance.registeredToFP {
+      var profilePictureUrl: String
+      if let
+        user = GIDSignIn.sharedInstance().currentUser,
+        userProfile = user.profile {
+          if userProfile.hasImage {
+            profilePictureUrl = userProfile.imageURLWithDimension(50).absoluteString!
+          } else {
+            profilePictureUrl = "default"
+          }
+          let data = ["action": "register_new_client", "name": userProfile.name,
+            "registration_token": AppState.sharedInstance.registrationToken!,
+            "profile_picture_url": profilePictureUrl]
+          var messageId = NSProcessInfo.processInfo().globallyUniqueString
+          GCMService.sharedInstance().sendMessage(data, to: AppState.sharedInstance.serverAddress,
+            withId: messageId)
+          AppState.sharedInstance.registeredToFP = true
+      } else {
+        println("User profile is not available")
+      }
     }
   }
 

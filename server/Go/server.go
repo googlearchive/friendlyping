@@ -120,7 +120,7 @@ func (s *fpServer) broadcastNewClient(c Client) error {
 
 // Send the list of clients to the newly registered client
 func (s *fpServer) sendClientList(c Client) error {
-	return gcm.Send(s.apiKey, gcm.Message{To: c.RegistrationToken, Data: gcm.Data{actionKey: sendClientList, "clients": s.getClientList()}})
+	return gcm.Send(s.apiKey, gcm.Message{To: c.RegistrationToken, Data: gcm.Data{actionKey: sendClientList, "clients": s.getClientList(c)}})
 }
 
 func (s *fpServer) pingClient(d gcm.Data) error {
@@ -152,19 +152,25 @@ func (s *fpServer) pingClient(d gcm.Data) error {
 		recipient = to
 		senderObject = s.clients.c[sender]
 	}
-	// This notification will be delivered in the more convenient way according to the platform
-	notification := &gcm.Notification{Body: createPingMessage(senderObject.Name), Title: pingTitle, Icon: androidIcon, Sound: "default"}
-	return gcm.Send(s.apiKey, gcm.Message{To: recipient, Data: d, Notification: *notification})
+	if senderObject == nil {
+		return errors.New("Sender is not a registered client")
+	} else {
+		// This notification will be delivered in the more convenient way according to the platform
+		notification := &gcm.Notification{Body: createPingMessage(senderObject.Name), Title: pingTitle, Icon: androidIcon, Sound: "default"}
+		return gcm.Send(s.apiKey, gcm.Message{To: recipient, Data: d, Notification: *notification})
+	}
 }
 
 // Transform the map of connected clients to an array of clients
-func (s *fpServer) getClientList() []*Client {
+func (s *fpServer) getClientList(c Client) []*Client {
 	i := 0
 	s.clients.RLock()
 	cl := make([]*Client, len(s.clients.c))
 	for k := range s.clients.c {
-		cl[i] = s.clients.c[k]
-		i++
+		if s.clients.c[k].RegistrationToken != c.RegistrationToken {
+			cl[i] = s.clients.c[k]
+			i++
+		}
 	}
 	s.clients.RUnlock()
 	return cl
