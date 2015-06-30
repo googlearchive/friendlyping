@@ -66,11 +66,8 @@ public class MyGcmListenerService extends GcmListenerService {
                 broadcastIntent.putParcelableArrayListExtra(IntentExtras.PINGERS, pingers);
                 break;
             case GcmAction.BROADCAST_NEW_CLIENT:
-                Pinger pinger = getNewPinger(data);
-                broadcastIntent.putExtra(IntentExtras.NEW_PINGER, pinger);
-                break;
-            case GcmAction.PING_CLIENT:
-                // TODO: 5/7/15 implement ping client
+                Pinger newPinger = getNewPinger(data);
+                broadcastIntent.putExtra(IntentExtras.NEW_PINGER, newPinger);
                 break;
         }
         LocalBroadcastManager.getInstance(this).sendBroadcast(broadcastIntent);

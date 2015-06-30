@@ -30,6 +30,7 @@ import com.google.samples.apps.friendlyping.model.Pinger;
 import com.bumptech.glide.Glide;
 
 import java.util.ArrayList;
+import java.util.Collection;
 
 /**
  * Display available {@link Pinger}s.
@@ -38,6 +39,10 @@ public class PingerAdapter extends BaseAdapter {
 
     private final ArrayList<Pinger> mPingers;
     private final LayoutInflater mLayoutInflater;
+
+    public PingerAdapter(Context context) {
+        this(context, new ArrayList<Pinger>());
+    }
 
     public PingerAdapter(Context context, ArrayList<Pinger> pingers) {
         mPingers = pingers;
@@ -49,6 +54,11 @@ public class PingerAdapter extends BaseAdapter {
      */
     public void addPinger(Pinger pinger) {
         mPingers.add(pinger);
+        notifyDataSetChanged();
+    }
+
+    public void addPinger(Collection<Pinger> pingers) {
+        mPingers.addAll(pingers);
         notifyDataSetChanged();
     }
 

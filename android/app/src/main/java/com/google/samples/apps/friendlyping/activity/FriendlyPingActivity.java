@@ -167,7 +167,6 @@ public class FriendlyPingActivity extends AppCompatActivity {
                 mFriendlyPingFragment = (FriendlyPingFragment) getCurrentFragment();
             } else {
                 mFriendlyPingFragment = new FriendlyPingFragment();
-                mFriendlyPingFragment.setGoogleApiClient(mGoogleApiClient);
             }
         }
         return mFriendlyPingFragment;
@@ -236,7 +235,7 @@ public class FriendlyPingActivity extends AppCompatActivity {
         }
 
         private void showErrorDialog(ConnectionResult connectionResult) {
-            int errorCode = connectionResult.getErrorCode();
+            final int errorCode = connectionResult.getErrorCode();
             if (GooglePlayServicesUtil.isUserRecoverableError(errorCode)) {
                 // Show the default Google Play services error dialog which may still start an
                 // intent on our behalf if the user can resolve the issue.
@@ -246,7 +245,10 @@ public class FriendlyPingActivity extends AppCompatActivity {
                             @Override
                             public void onCancel(DialogInterface dialog) {
                                 mShouldResolve = false;
-                                // FIXME: 4/27/15 handle failing
+                                // For simplicity reasons we just finish the activity.
+                                // In a real world app you should deal with failing properly.
+                                Log.i(TAG, "Could not resolve issue with code: " + errorCode);
+                                finish();
                             }
                         }).show();
             } else {
@@ -254,9 +256,11 @@ public class FriendlyPingActivity extends AppCompatActivity {
                 Toast.makeText(FriendlyPingActivity.this,
                         getString(R.string.play_services_error_fmt, errorCode), Toast.LENGTH_SHORT)
                         .show();
-
                 mShouldResolve = false;
-                // FIXME: 4/27/15 handle failing
+                // For simplicity reasons we just finish the activity.
+                // In a real world app you should deal with failing properly.
+                Log.i(TAG, "Could not resolve issue with code: " + errorCode);
+                finish();
             }
         }
     };
