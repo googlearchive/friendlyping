@@ -218,7 +218,12 @@ public class FriendlyPingFragment extends Fragment {
                     break;
                 case GcmAction.BROADCAST_NEW_CLIENT:
                     Pinger pinger = intent.getParcelableExtra(IntentExtras.NEW_PINGER);
-                    mPingerAdapter.addPinger(pinger);
+                    String selfRegToken =
+                            mDefaultSharedPreferences.getString(RegistrationConstants.TOKEN, null);
+                    if (selfRegToken != null &&
+                            !selfRegToken.equals(pinger.getRegistrationToken())) {
+                        mPingerAdapter.addPinger(pinger);
+                    }
                     break;
             }
         }
