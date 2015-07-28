@@ -14,14 +14,16 @@
  * limitations under the License.
  */
 
-package com.google.samples.apps.friendlyping.constants;
+package com.google.samples.apps.friendlyping.util;
 
-/**
- * Holding intent extra keys in a central place.
- */
-public class IntentExtras {
+import android.content.Context;
 
-    public static final String PINGERS = "pingers";
-    public static final String NEW_PINGER = "newPinger";
-    public static final String PING_SENDER = "sender";
+import com.google.samples.apps.friendlyping.R;
+
+public class FriendlyPingUtil {
+
+    public static String getServerUrl(Context context) {
+        return context.getString(R.string.gcm_defaultSenderId) + "@gcm.googleapis.com";
+    }
+
 }

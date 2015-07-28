@@ -20,6 +20,7 @@ import android.app.Activity;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentSender;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.v4.app.Fragment;
@@ -36,6 +37,8 @@ import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.plus.Plus;
 import com.google.samples.apps.friendlyping.AnalyticsHelper;
 import com.google.samples.apps.friendlyping.R;
+import com.google.samples.apps.friendlyping.constants.IntentExtras;
+import com.google.samples.apps.friendlyping.constants.PreferenceKeys;
 import com.google.samples.apps.friendlyping.constants.RegistrationConstants;
 import com.google.samples.apps.friendlyping.fragment.FriendlyPingFragment;
 import com.google.samples.apps.friendlyping.fragment.SignInFragment;
@@ -79,6 +82,13 @@ public class FriendlyPingActivity extends AppCompatActivity {
                 .addApi(Plus.API)
                 .addScope(Plus.SCOPE_PLUS_PROFILE)
                 .build();
+        // Check if the intent has a sender, if so save sender in SharedPreferences.
+        // When pingers are listed next. this saved sender will be moved to the top.
+        if (getIntent().hasExtra(IntentExtras.PING_SENDER)) {
+            String pingerToken = getIntent().getStringExtra(IntentExtras.PING_SENDER);
+            SharedPreferences.Editor editor = PreferenceManager.getDefaultSharedPreferences(this).edit();
+            editor.putString(PreferenceKeys.SENDING_PINGER_TOKEN, pingerToken).apply();
+        }
     }
 
     @Override

@@ -50,6 +50,7 @@ import com.google.samples.apps.friendlyping.gcm.GcmAction;
 import com.google.samples.apps.friendlyping.gcm.RegistrationIntentService;
 import com.google.samples.apps.friendlyping.model.Pinger;
 import com.google.samples.apps.friendlyping.model.TrackingEvent;
+import com.google.samples.apps.friendlyping.util.FriendlyPingUtil;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -188,8 +189,8 @@ public class FriendlyPingFragment extends Fragment {
                 mDefaultSharedPreferences.getString(RegistrationConstants.TOKEN, null));
         try {
             GoogleCloudMessaging.getInstance(context)
-                    .send(pinger.getRegistrationToken(), String.valueOf(System.currentTimeMillis()),
-                            data);
+                    .send(FriendlyPingUtil.getServerUrl(getActivity()),
+                            String.valueOf(System.currentTimeMillis()), data);
             AnalyticsHelper.send(context, TrackingEvent.PING_SENT);
         } catch (IOException e) {
             Log.w(TAG, "Could not ping client.", e);

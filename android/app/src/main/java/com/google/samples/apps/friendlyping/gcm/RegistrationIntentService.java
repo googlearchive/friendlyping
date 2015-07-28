@@ -33,6 +33,7 @@ import com.google.android.gms.plus.model.people.Person;
 import com.google.samples.apps.friendlyping.constants.PingerKeys;
 import com.google.samples.apps.friendlyping.R;
 import com.google.samples.apps.friendlyping.constants.RegistrationConstants;
+import com.google.samples.apps.friendlyping.util.FriendlyPingUtil;
 
 import java.io.IOException;
 
@@ -97,8 +98,7 @@ public class RegistrationIntentService extends IntentService {
         registration.putString(PingerKeys.REGISTRATION_TOKEN, token);
 
         // Register the user at the server.
-        GoogleCloudMessaging.getInstance(this).send(
-                getString(R.string.gcm_defaultSenderId) + "@gcm.googleapis.com",
+        GoogleCloudMessaging.getInstance(this).send(FriendlyPingUtil.getServerUrl(this),
                 String.valueOf(System.currentTimeMillis()), registration);
     }
 

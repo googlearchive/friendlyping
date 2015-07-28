@@ -16,12 +16,7 @@
 
 package com.google.samples.apps.friendlyping.constants;
 
-/**
- * Holding intent extra keys in a central place.
- */
-public class IntentExtras {
+public class PreferenceKeys {
 
-    public static final String PINGERS = "pingers";
-    public static final String NEW_PINGER = "newPinger";
-    public static final String PING_SENDER = "sender";
+    public static final String SENDING_PINGER_TOKEN = "sendingPingerToken";
 }
