@@ -89,9 +89,6 @@ public class FriendlyPingFragment extends Fragment {
 
         mRegistrationBroadcastReceiver = new FriendlyPingBroadcastReceiver();
         mDefaultSharedPreferences = PreferenceManager.getDefaultSharedPreferences(activity);
-        // Start IntentService to register this application with GCM.
-        Intent service = new Intent(activity, RegistrationIntentService.class);
-        activity.startService(service);
     }
 
     @Override
@@ -140,6 +137,18 @@ public class FriendlyPingFragment extends Fragment {
             mPingerAdapter = new PingerAdapter(getActivity());
             listView.setAdapter(mPingerAdapter);
         }
+
+        // Check for saved list of pingers.
+        if (savedInstanceState == null) {
+            // Start IntentService to register this application with GCM.
+            Intent service = new Intent(getActivity(), RegistrationIntentService.class);
+            getActivity().startService(service);
+        } else {
+            // If saved list of pingers exists use them.
+            ArrayList<Pinger> tmpPingers = savedInstanceState.getParcelableArrayList(KEY_PINGERS);
+            mPingerAdapter.addPinger(tmpPingers);
+        }
+
         // Restore previously saved data.
         if (savedInstanceState != null) {
             ArrayList<Pinger> tmpPingers = savedInstanceState.getParcelableArrayList(KEY_PINGERS);
