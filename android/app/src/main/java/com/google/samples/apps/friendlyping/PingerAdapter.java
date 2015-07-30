@@ -60,8 +60,10 @@ public class PingerAdapter extends BaseAdapter {
      * Add a pinger to the list.
      */
     public void addPinger(Pinger pinger) {
-        mPingers.add(pinger);
-        notifyDataSetChanged();
+        if (!mPingers.contains(pinger)) {
+            mPingers.add(pinger);
+            notifyDataSetChanged();
+        }
     }
 
     public void addPinger(Collection<Pinger> pingers) {

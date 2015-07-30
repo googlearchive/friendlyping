@@ -40,7 +40,7 @@
                 <category android:name="android.intent.category.LAUNCHER" />
                 <!-- [END_EXCLUDE] -->
                 <!-- Register for clicks on Notifications from GCM. -->
-                <action android:name="com.google.samples.apps.friendlyping.pingReceived" />
+                <action android:name="ping_received" />
                 <category android:name="android.intent.category.DEFAULT" />
                 <!-- [END register_for_notification_clicks] -->
             </intent-filter>

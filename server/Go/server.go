@@ -37,6 +37,7 @@ const (
 	pingClient         = "ping_client"
 	pingTitle          = "Friendly Ping!"
 	androidIcon        = "mipmap/ic_launcher"
+	pingReceived       = "ping_received"
 )
 
 var (
@@ -164,7 +165,8 @@ func (s *fpServer) pingClient(d gcm.Data) (*gcm.HttpResponse, error) {
 		return response, errors.New("Sender is not a registered client")
 	} else {
 		// This notification will be delivered in the more convenient way according to the platform
-		notification := &gcm.Notification{Body: createPingMessage(senderObject.Name), Title: pingTitle, Icon: androidIcon, Sound: "default"}
+		notification := &gcm.Notification{Body: createPingMessage(senderObject.Name), Title: pingTitle, Icon: androidIcon, Sound: "default",
+			ClickAction: pingReceived}
 		message := &gcm.HttpMessage{To: recipient, Data: d, Notification: *notification}
 		response, err := gcm.SendHttp(s.apiKey, *message)
 		if err == nil {

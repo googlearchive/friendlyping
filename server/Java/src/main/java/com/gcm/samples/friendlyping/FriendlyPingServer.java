@@ -83,10 +83,8 @@ public class FriendlyPingServer {
 
   private static final Logger logger = Logger.getLogger("FriendlyPingServer");
 
-  //private static final String SENDER_ID = "<SENDER_ID>";
-  //private static final String API_KEY = "<API_KEY>";
-  private static final String SENDER_ID = "1015367374593";
-  private static final String API_KEY = "AIzaSyCFVrvWMv0ueY0-wN_RWK_OJ_FmcgkoF_I";
+  private static final String SENDER_ID = "<SENDER_ID>";
+  private static final String API_KEY = "<API_KEY>";
 
   // Actions
   private static final String REGISTER_NEW_CLIENT = "register_new_client";
@@ -100,10 +98,10 @@ public class FriendlyPingServer {
   private static final String DATA_KEY = "data";
   private static final String SENDER_KEY = "sender";
 
-  private static final String NEW_CLIENT_TOPIC = "/topics/newuser";
+  private static final String NEW_CLIENT_TOPIC = "/topics/newclient";
   private static final String PING_TITLE = "Friendly Ping!";
-  // TODO(arthurthompson): Use friendlyping notification notification icon here instead of launcher.
   private static final String PING_ICON = "mipmap/ic_launcher";
+  private static final String CLICK_ACTION = "ping_received";
 
   public static final String SERVICE_NAME = "Friendly Ping Server";
 
@@ -243,7 +241,7 @@ public class FriendlyPingServer {
     jNotification.addProperty("title", PING_TITLE);
     jNotification.addProperty("icon", PING_ICON);
     jNotification.addProperty("sound", "default");
-    jNotification.addProperty("click_action", "com.google.samples.apps.friendlyping.pingReceived");
+    jNotification.addProperty("click_action", CLICK_ACTION);
 
     jPing.add(DATA_KEY, jData);
     jPing.add("notification", jNotification);
