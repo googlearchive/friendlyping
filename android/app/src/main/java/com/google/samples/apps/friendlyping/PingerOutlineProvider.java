@@ -30,7 +30,7 @@ public class PingerOutlineProvider extends ViewOutlineProvider {
 
     @Override
     public void getOutline(View view, Outline outline) {
-        final int size = view.getResources().getDimensionPixelSize(R.dimen.fab_size_normal);
+        final int size = view.getResources().getDimensionPixelSize(R.dimen.design_fab_size_normal);
         outline.setOval(0, 0, size, size);
     }
 }

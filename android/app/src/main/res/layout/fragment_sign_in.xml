@@ -30,7 +30,7 @@
         android:layout_height="wrap_content"
         android:contentDescription="@string/app_name"
         android:gravity="center"
-        android:minHeight="@dimen/fab_size_normal"
+        android:minHeight="@dimen/design_fab_size_normal"
         android:scaleType="fitXY"
         android:src="@drawable/logotype" />
 

@@ -22,8 +22,8 @@
 
     <ImageView
         android:id="@+id/profile_picture"
-        android:layout_width="@dimen/fab_size_normal"
-        android:layout_height="@dimen/fab_size_normal"
+        android:layout_width="@dimen/design_fab_size_normal"
+        android:layout_height="@dimen/design_fab_size_normal"
         android:layout_marginLeft="@dimen/keyline_16"
         android:layout_marginRight="@dimen/keyline_16"
         android:contentDescription="@string/description_profile_picture" />

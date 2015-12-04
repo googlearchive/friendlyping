@@ -23,5 +23,6 @@ public class IntentExtras {
 
     public static final String PINGERS = "pingers";
     public static final String NEW_PINGER = "newPinger";
+    public static final String NEW_PING = "newPing";
     public static final String PING_SENDER = "sender";
 }

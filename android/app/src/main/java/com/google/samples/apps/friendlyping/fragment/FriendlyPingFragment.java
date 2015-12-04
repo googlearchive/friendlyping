@@ -27,6 +27,7 @@ import android.preference.PreferenceManager;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.content.LocalBroadcastManager;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
@@ -48,6 +49,7 @@ import com.google.samples.apps.friendlyping.constants.PingerKeys;
 import com.google.samples.apps.friendlyping.constants.RegistrationConstants;
 import com.google.samples.apps.friendlyping.gcm.GcmAction;
 import com.google.samples.apps.friendlyping.gcm.RegistrationIntentService;
+import com.google.samples.apps.friendlyping.model.Ping;
 import com.google.samples.apps.friendlyping.model.Pinger;
 import com.google.samples.apps.friendlyping.model.TrackingEvent;
 import com.google.samples.apps.friendlyping.util.FriendlyPingUtil;
@@ -111,6 +113,7 @@ public class FriendlyPingFragment extends Fragment {
         filter.addAction(RegistrationConstants.REGISTRATION_COMPLETE);
         filter.addAction(GcmAction.SEND_CLIENT_LIST);
         filter.addAction(GcmAction.BROADCAST_NEW_CLIENT);
+        filter.addAction(GcmAction.PING_CLIENT);
         LocalBroadcastManager.getInstance(getActivity())
                 .registerReceiver(mRegistrationBroadcastReceiver, filter);
     }
@@ -235,6 +238,14 @@ public class FriendlyPingFragment extends Fragment {
                         mPingerAdapter.addPinger(pinger);
                     }
                     break;
+                case GcmAction.PING_CLIENT:
+                    Ping ping = intent.getParcelableExtra(IntentExtras.NEW_PING);
+                    mPingerAdapter.moveToTop(ping.getFrom());
+                    AlertDialog.Builder builder = new AlertDialog.Builder(getActivity(),
+                            R.style.AppCompatAlertDialogStyle);
+                    builder.setTitle("FriendlyPing!");
+                    builder.setMessage(ping.getBody());
+                    builder.show();
             }
         }
 

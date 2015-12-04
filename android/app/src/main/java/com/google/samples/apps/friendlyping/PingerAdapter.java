@@ -91,7 +91,10 @@ public class PingerAdapter extends BaseAdapter {
         notifyDataSetChanged();
     }
 
-    private void moveToTop(String pingerToken) {
+    /**
+     * Move a pinger identified by registration token to the top of the list.
+     */
+    public void moveToTop(String pingerToken) {
         Pinger pinger = getPingerByToken(pingerToken);
         if (pinger != null) {
             moveToTop(pinger);

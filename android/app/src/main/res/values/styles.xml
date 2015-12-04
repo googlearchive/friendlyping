@@ -23,4 +23,10 @@
         <item name="colorPrimary">@color/sign_in_background</item>
         <item name="android:windowBackground">@color/sign_in_background</item>
     </style>
+
+    <style name="AppCompatAlertDialogStyle" parent="Theme.AppCompat.Light.Dialog.Alert">
+        <item name="colorAccent">#5fa3d0</item>
+        <item name="android:textColorPrimary">@color/primary</item>
+        <item name="android:background">@color/sign_in_background</item>
+    </style>
 </resources>

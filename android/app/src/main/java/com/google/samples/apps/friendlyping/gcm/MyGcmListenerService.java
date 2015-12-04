@@ -23,6 +23,8 @@ import android.util.Log;
 
 import com.google.android.gms.gcm.GcmListenerService;
 import com.google.samples.apps.friendlyping.constants.IntentExtras;
+import com.google.samples.apps.friendlyping.constants.PingKeys;
+import com.google.samples.apps.friendlyping.model.Ping;
 import com.google.samples.apps.friendlyping.model.Pinger;
 
 import org.json.JSONArray;
@@ -69,6 +71,10 @@ public class MyGcmListenerService extends GcmListenerService {
                 Pinger newPinger = getNewPinger(data);
                 broadcastIntent.putExtra(IntentExtras.NEW_PINGER, newPinger);
                 break;
+            case GcmAction.PING_CLIENT:
+                Ping newPing = getNewPing(data);
+                broadcastIntent.putExtra(IntentExtras.NEW_PING, newPing);
+                break;
         }
         LocalBroadcastManager.getInstance(this).sendBroadcast(broadcastIntent);
     }
@@ -86,5 +92,11 @@ public class MyGcmListenerService extends GcmListenerService {
     private Pinger getNewPinger(Bundle data) throws JSONException {
         final JSONObject client = new JSONObject(data.getString("client"));
         return Pinger.fromJson(client);
+    }
+
+    private Ping getNewPing(Bundle data) throws JSONException {
+        final Bundle notificationData = data.getBundle(PingKeys.NOTIFICATION);
+        return new Ping(notificationData.getString(PingKeys.NOTIFICATION_BODY),
+                data.getString(PingKeys.SENDER));
     }
 }
