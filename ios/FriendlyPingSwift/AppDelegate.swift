@@ -29,11 +29,12 @@ class AppDelegate: UIResponder, UIApplicationDelegate, GIDSignInDelegate, GCMRec
     return true
   }
 
+  /** Load configuration data from the GoogleService-Info.plist file */
   func configureGGLContext() {
     var configureError:NSError?
     GGLContext.sharedInstance().configureWithError(&configureError)
     if configureError != nil {
-      println("Error configuring the Google context: \(configureError)")
+      print("Error configuring the Google context: \(configureError)")
     }
     GIDSignIn.sharedInstance().delegate = self
     let senderID = GGLContext.sharedInstance().configuration.gcmSenderID
@@ -41,29 +42,36 @@ class AppDelegate: UIResponder, UIApplicationDelegate, GIDSignInDelegate, GCMRec
     AppState.sharedInstance.serverAddress = "\(senderID)@gcm.googleapis.com"
   }
 
+  /** Initialize configuration of GCM */
   func configureGCMService() {
-    var config = GCMConfig.defaultConfig()
+    let config = GCMConfig.defaultConfig()
     config.receiverDelegate = self
     config.logLevel = GCMLogLevel.Debug
     GCMService.sharedInstance().startWithConfig(config)
   }
 
+  /** Register for remote notifications to get an APNs token to use for registration to GCM */
   func registerForRemoteNotifications(application: UIApplication) {
-    var types: UIUserNotificationType = UIUserNotificationType.Badge |
-      UIUserNotificationType.Alert |
-      UIUserNotificationType.Sound
-    var settings: UIUserNotificationSettings =
-    UIUserNotificationSettings( forTypes: types, categories: nil )
-    application.registerUserNotificationSettings(settings)
-    application.registerForRemoteNotifications()
+    if #available(iOS 8.0, *) {
+      let settings: UIUserNotificationSettings =
+      UIUserNotificationSettings(forTypes: [.Alert, .Badge, .Sound], categories: nil)
+      application.registerUserNotificationSettings(settings)
+      application.registerForRemoteNotifications()
+    } else {
+      // Fallback
+      let types: UIRemoteNotificationType = [.Alert, .Badge, .Sound]
+      application.registerForRemoteNotificationTypes(types)
+    }
   }
 
+  /** Handle the URL that the application receives at the end of the authentication process */
   func application(application: UIApplication,
-      openURL url: NSURL, sourceApplication: String?, annotation: AnyObject?) -> Bool {
+      openURL url: NSURL, sourceApplication: String?, annotation: AnyObject) -> Bool {
     return GIDSignIn.sharedInstance().handleURL(url, sourceApplication: sourceApplication,
         annotation: annotation)
   }
 
+  /** Sign the user in to FriendlyPing */
   func signIn(signIn: GIDSignIn!, didSignInForUser user: GIDGoogleUser!,
       withError error: NSError!) {
     if (error == nil) {
@@ -73,51 +81,58 @@ class AppDelegate: UIResponder, UIApplicationDelegate, GIDSignInDelegate, GCMRec
       NSNotificationCenter.defaultCenter().postNotificationName(Constants.NotificationKeys.SignedIn,
         object: nil, userInfo: nil)
     } else {
-      println("\(error.localizedDescription)")
+      print("\(error.localizedDescription)")
     }
   }
 
+  /** Sign the user out of FriendlyPing */
   func signIn(signIn: GIDSignIn!, didDisconnectWithUser user:GIDGoogleUser!,
       withError error: NSError!) {
     AppState.sharedInstance.signedIn = false
     AppState.sharedInstance.registeredToFP = false
   }
 
+  // Connect to GCM when application becomes active
   func applicationDidBecomeActive( application: UIApplication) {
     GCMService.sharedInstance().connectWithHandler({
       (NSError error) -> Void in
       if error != nil {
-        println("Could not connect to GCM: \(error.localizedDescription)")
+        print("Could not connect to GCM: \(error.localizedDescription)")
       } else {
-        println("Connected to GCM")
+        print("Connected to GCM")
         AppState.sharedInstance.connectedToGcm = true
         self.connectToFriendlyPing()
       }
     })
   }
 
+  /** Tear down connection to GCM when application goes in background */
   func applicationDidEnterBackground(application: UIApplication) {
     GCMService.sharedInstance().disconnect()
     AppState.sharedInstance.connectedToGcm = false
   }
 
+  /** Use APNs token to get a registration token for GCM */
   func application( application: UIApplication, didRegisterForRemoteNotificationsWithDeviceToken
       deviceToken: NSData ) {
     GGLInstanceID.sharedInstance().startWithConfig(GGLInstanceIDConfig.defaultConfig())
-    var registrationOptions = [kGGLInstanceIDRegisterAPNSOption:deviceToken,
+    let registrationOptions = [kGGLInstanceIDRegisterAPNSOption:deviceToken,
+        // This should be set to false if your certificate is for the APNs production environment
         kGGLInstanceIDAPNSServerTypeSandboxOption:true]
     GGLInstanceID.sharedInstance().tokenWithAuthorizedEntity(AppState.sharedInstance.senderID,
         scope: kGGLInstanceIDScopeGCM, options: registrationOptions, handler: registrationHandler)
   }
 
+  /** There has been an error registering for remote notification */
   func application( application: UIApplication, didFailToRegisterForRemoteNotificationsWithError
       error: NSError ) {
-    println("Registration for remote notification failed with error: \(error.localizedDescription)")
+    print("Registration for remote notification failed with error: \(error.localizedDescription)")
     let userInfo = ["error": error.localizedDescription]
     NSNotificationCenter.defaultCenter().postNotificationName(
         Constants.NotificationKeys.Registration, object: nil, userInfo: userInfo)
   }
 
+  /** Handles the completion of registration with GCM */
   func registrationHandler(registrationToken: String!, error: NSError!) {
     if (registrationToken != nil) {
       AppState.sharedInstance.registrationToken = registrationToken;
@@ -126,13 +141,14 @@ class AppDelegate: UIResponder, UIApplicationDelegate, GIDSignInDelegate, GCMRec
       NSNotificationCenter.defaultCenter().postNotificationName(
         Constants.NotificationKeys.Registration, object: nil, userInfo: userInfo)
     } else {
-      println("Registration to GCM failed with error: \(error.localizedDescription)")
+      print("Registration to GCM failed with error: \(error.localizedDescription)")
       let userInfo = ["error": error.localizedDescription]
       NSNotificationCenter.defaultCenter().postNotificationName(
         Constants.NotificationKeys.Registration, object: nil, userInfo: userInfo)
     }
   }
 
+  // Handles reception of a notification */
   func application( application: UIApplication,
       didReceiveRemoteNotification userInfo: [NSObject : AnyObject]) {
     GCMService.sharedInstance().appDidReceiveMessage(userInfo);
@@ -140,6 +156,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, GIDSignInDelegate, GCMRec
         Constants.NotificationKeys.Message, object: nil, userInfo: userInfo)
   }
 
+  // Handles reception of a notification */
   func application( application: UIApplication,
       didReceiveRemoteNotification userInfo: [NSObject : AnyObject],
       fetchCompletionHandler handler: (UIBackgroundFetchResult) -> Void) {
@@ -149,6 +166,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, GIDSignInDelegate, GCMRec
     handler(UIBackgroundFetchResult.NoData);
   }
 
+  /** Connects to the FriendlyPing server */
   func connectToFriendlyPing() {
     if AppState.sharedInstance.connectedToGcm && AppState.sharedInstance.signedIn &&
         AppState.sharedInstance.registrationToken != nil {
@@ -157,6 +175,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, GIDSignInDelegate, GCMRec
     }
   }
 
+  /** Subscribes to the topic used for announcement of new clients */
   func subscribeToTopic() {
     if !AppState.sharedInstance.subscribed {
       GCMPubSub().subscribeWithToken(AppState.sharedInstance.registrationToken!,
@@ -164,8 +183,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, GIDSignInDelegate, GCMRec
             (NSError error) -> Void in
               if (error != nil) {
                 // TODO(silvano): treat already subscribed with more grace
-                println("Error subscribing: \(error)")
-                println("Topic subscription failed with error: \(error.localizedDescription)")
+                print("Topic subscription failed with error: \(error.localizedDescription)")
                 let userInfo = ["error": error.localizedDescription]
                 NSNotificationCenter.defaultCenter().postNotificationName(
                   Constants.NotificationKeys.Registration, object: nil, userInfo: userInfo)
@@ -176,6 +194,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, GIDSignInDelegate, GCMRec
     }
   }
 
+  /** Adds the local client to the registered clients of FriendlyPing */
   func registerToFriendlyPing() {
     if !AppState.sharedInstance.registeredToFP {
       var profilePictureUrl: String
@@ -183,33 +202,20 @@ class AppDelegate: UIResponder, UIApplicationDelegate, GIDSignInDelegate, GCMRec
         user = GIDSignIn.sharedInstance().currentUser,
         userProfile = user.profile {
           if userProfile.hasImage {
-            profilePictureUrl = userProfile.imageURLWithDimension(50).absoluteString!
+            profilePictureUrl = userProfile.imageURLWithDimension(50).absoluteString
           } else {
             profilePictureUrl = "default"
           }
           let data = ["action": "register_new_client", "name": userProfile.name,
             "registration_token": AppState.sharedInstance.registrationToken!,
             "profile_picture_url": profilePictureUrl]
-          var messageId = NSProcessInfo.processInfo().globallyUniqueString
+          let messageId = NSProcessInfo.processInfo().globallyUniqueString
           GCMService.sharedInstance().sendMessage(data, to: AppState.sharedInstance.serverAddress,
             withId: messageId)
           AppState.sharedInstance.registeredToFP = true
       } else {
-        println("User profile is not available")
+        print("User profile is not available")
       }
     }
-  }
-
-  // TODO(silvano): do we actually need the message tracking in FP?
-  func willSendDataMessageWithID(messageID: String, error: NSError) {
-    println("Error sending message \(messageID): \(error)")
-  }
-
-  func didSendDataMessageWithID(messageID: String) {
-    println("Message \(messageID) successfully sent")
-  }
-
-  func didDeleteMessagesOnServer() {
-    println("Do something")
   }
 }

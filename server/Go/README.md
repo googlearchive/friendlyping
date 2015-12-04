@@ -2,36 +2,14 @@ golang Friendly Ping
 --
 
 ## Installation
-Copy the internal version of the GCM demon from `https://devrel.git.corp.google.com/libraries/gcm-go/`
-to `github.com/aliafshar/gcm` in the `src` folder of your `GOPATH`, and go get its dependencies
-(won't be needed when all the changes are published).
-    
-    $ cd $GOPATH
-    $ git clone sso://devrel/libraries/gcm-go src/github.com/aliafshar/gcm
-    $ go get -a github.com/mattn/go-xmpp
+Install go-gcm:
+
+	$ got get github.com/google/go-gcm
+	$ go install github.com/google/go-gcm
+
 
 
 ## Usage
 
-    $ go run server.go -apiKey AIzaSyB8bwYxv2YDn663HoOrkg0yCaYkesVcoKo \
-    -senderId 177545629583 -testData testdata/clients.json
-
-## Usage from clients
-
-From iOS Swift, this is how you register a new client:
-
-```
-let data = ["action": "register_new_client", "name": "Silvano", "registration_token": registrationToken!, "profile_picture_url": "profile.jpg"]
-var messageId = NSProcessInfo.processInfo().globallyUniqueString
-GCMService.sharedInstance().sendMessage(data, to: "\(gcmSenderID)@gcm.googleapis.com", withId: messageId)
-```
-
-To parse the list of clients sent by the server:
-
-```
-func application( application: UIApplication,
-    didReceiveRemoteNotification userInfo: [NSObject : AnyObject]) {
-  var clients = userInfo["clients"]!
-  println("Notification received: \(clients)")
-}
-```
+    $ go run server.go -testData testdata/clients.json \
+    -apiKey <your_api_key> -senderId <your_sender_id> 

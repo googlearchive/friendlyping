@@ -14,7 +14,8 @@
 //  limitations under the License.
 //
 
-class AnalyticsHelper: NSObject {
+/** An helper class that abstracts sending events to Google Analytics */
+class AnalyticsHelper {
 
   static func sendLoginEvent() {
     GAI.sharedInstance().defaultTracker.send(GAIDictionaryBuilder.createEventWithCategory(

@@ -16,6 +16,7 @@
 
 import UIKit
 
+/** Data structure for a Friendly Ping client */
 class FriendlyPingClient: NSObject {
   var name: String?
   var registrationToken: String?

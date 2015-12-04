@@ -14,6 +14,7 @@
 //  limitations under the License.
 //
 
+/** App constants */
 struct Constants {
   struct GCMStrings {
     static let Topic = "/topics/newclient"

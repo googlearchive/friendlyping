@@ -16,10 +16,12 @@
 
 import UIKit
 
+/** View controller for the sign in screen */
 class SignInViewController: UIViewController, GIDSignInUIDelegate {
 
   @IBOutlet weak var signInButton: GIDSignInButton!
 
+  /** Set SignIn delegate and try to sign in silently */
   override func viewDidLoad() {
     super.viewDidLoad()
     GIDSignIn.sharedInstance().uiDelegate = self
@@ -28,10 +30,12 @@ class SignInViewController: UIViewController, GIDSignInUIDelegate {
       name: Constants.NotificationKeys.SignedIn, object: nil)
   }
 
+  /** The user tapped the sign in button */
   @IBAction func didTapSignIn(sender: UIButton) {
     GIDSignIn.sharedInstance().signIn()
   }
 
+  /** Perform segue to main screen after the user has signed in */
   func signedIn() {
     performSegueWithIdentifier(Constants.Segues.SignInToFp, sender: nil)
   }

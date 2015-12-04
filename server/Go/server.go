@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+// A go server for the Friendly Ping sample application.
 package main
 
 import (
@@ -58,6 +59,7 @@ type fpServer struct {
 	clients  Clients
 }
 
+// The registry of connected clients
 type Clients struct {
 	sync.RWMutex
 	c map[string]*Client
@@ -71,12 +73,12 @@ type Client struct {
 }
 
 // Callback for gcmd listen: check action and dispatch server method
-func (s *fpServer) onMessage(from string, d gcm.Data) error {
-	switch d[actionKey] {
+func (s *fpServer) onMessage(cm gcm.CcsMessage) error {
+	switch cm.Data[actionKey] {
 	case registerNewClient:
-		return s.registerNewClient(d)
+		return s.registerNewClient(cm.Data)
 	case pingClient:
-		_, err := s.pingClient(d)
+		_, err := s.pingClient(cm.Data)
 		if err != nil {
 			log.Printf("Failed pinging client: %v", err)
 		}
@@ -85,7 +87,8 @@ func (s *fpServer) onMessage(from string, d gcm.Data) error {
 	return nil
 }
 
-// Add new client to registered clients, send list of registered clients to new client
+// Registration of a new client:
+// add new client to registered clients, send list of registered clients to new client,
 // broadcast the new client to new client topic
 func (s *fpServer) registerNewClient(d gcm.Data) error {
 	name, ok := d["name"].(string)
@@ -131,6 +134,7 @@ func (s *fpServer) sendClientList(c Client) (*gcm.HttpResponse, error) {
 	return response, err
 }
 
+// Send a ping to a client; if the recipient is the server, echo back a reply
 func (s *fpServer) pingClient(d gcm.Data) (*gcm.HttpResponse, error) {
 	response := &gcm.HttpResponse{}
 	senderObject := &Client{}
@@ -192,6 +196,7 @@ func (s *fpServer) checkResponse(m *gcm.HttpMessage, r *gcm.HttpResponse) {
 	}
 }
 
+// Update the registration token of a client
 func (s *fpServer) updateRegistrationId(new string, old string) {
 	swapClient := s.clients.c[old]
 	s.clients.Lock()
