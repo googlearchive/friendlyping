@@ -4,7 +4,7 @@ golang Friendly Ping
 ## Installation
 Install go-gcm:
 
-	$ got get github.com/google/go-gcm
+	$ go get github.com/google/go-gcm
 	$ go install github.com/google/go-gcm
 
 
