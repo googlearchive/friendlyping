@@ -75,11 +75,11 @@ Don't build and run the client until you have one of the servers running. Dont' 
 
 ### Go server
 
-Read the [Go server instructions](server/go/README.md). You can get your Server API Key and Sender ID for your project from its **Download and install configuration** page at https://developers.google.com/mobile.add.
+Read the [Go server instructions](server/Go/README.md). You can get your Server API Key and Sender ID for your project from its **Download and install configuration** page at https://developers.google.com/mobile.add.
 
 ### Java server
 
-Read the [Java server instructions](server/java/README.md). You can get your Server API Key and Sender ID for your project from its **Download and install configuration** page at https://developers.google.com/mobile.add.
+Read the [Java server instructions](server/Java/README.md). You can get your Server API Key and Sender ID for your project from its **Download and install configuration** page at https://developers.google.com/mobile.add.
 
 ## How to make contributions?
 Please read and follow the steps in the [CONTRIBUTING.md](CONTRIBUTING.md)
