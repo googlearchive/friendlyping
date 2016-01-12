@@ -66,8 +66,8 @@ Download the `GoogleService-Info.plist` file to your mac, then add it to the `Fr
 in the xcode project.
 To configure Google Sign-In:
 
-- In the **Project `> Target > Info > URL Types** panel, create a new item and paste your 
-`REVERSED_CLIENT_ID into the URL Schemes field. You can find your `REVERSED_CLIENT_ID` in the `GoogleService-Info.plist` file.
+- In the **Project > Target > Info > URL Types** panel, create a new item and paste your 
+`REVERSED_CLIENT_ID` into the URL Schemes field. You can find your `REVERSED_CLIENT_ID` in the `GoogleService-Info.plist` file.
 - Also in the **Project > Target > Info > URL Types** panel, create a new item and type your bundle identifier
 in the **URL Schemes** field.
 
