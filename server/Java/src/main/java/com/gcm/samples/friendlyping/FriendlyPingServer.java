@@ -84,7 +84,7 @@ public class FriendlyPingServer {
   private static final Logger logger = Logger.getLogger("FriendlyPingServer");
 
   private static final String SENDER_ID = "<SENDER_ID>";
-  private static final String API_KEY = "<API_KEY>";
+  private static final String SERVER_API_KEY = "<SERVER_API_KEY>";
 
   // Actions
   private static final String REGISTER_NEW_CLIENT = "register_new_client";
@@ -251,7 +251,7 @@ public class FriendlyPingServer {
 
   public static void main(String[] args) {
     // Initialize FriendlyPingServer with appropriate API Key and SenderID.
-    new FriendlyPingServer(API_KEY, SENDER_ID);
+    new FriendlyPingServer(SERVER_API_KEY, SENDER_ID);
 
     // Keep main thread alive.
     try {

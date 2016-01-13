@@ -5,8 +5,11 @@ messages are sent and received via CCS.
 
 ##Build
 
-In `FriendlyPingServer.java`, replace the `<SENDER_ID>` and `<API_KEY>` placeholders with the values
+In `FriendlyPingServer.java`, replace the `<SENDER_ID>` and `<SERVER_API_KEY>` placeholders with the values
 for your project.
+
+You can get your Server API Key and Sender ID for your project from its **Download and install configuration** page at https://developers.google.com/mobile/add.
+
 
 	./gradlew build
  
