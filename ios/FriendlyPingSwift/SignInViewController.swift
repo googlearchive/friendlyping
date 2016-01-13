@@ -26,7 +26,7 @@ class SignInViewController: UIViewController, GIDSignInUIDelegate {
     super.viewDidLoad()
     GIDSignIn.sharedInstance().uiDelegate = self
     GIDSignIn.sharedInstance().signInSilently()
-    NSNotificationCenter.defaultCenter().addObserver(self, selector: "signedIn",
+    NSNotificationCenter.defaultCenter().addObserver(self, selector: "transitionIfReady",
       name: Constants.NotificationKeys.SignedIn, object: nil)
   }
 
@@ -35,9 +35,17 @@ class SignInViewController: UIViewController, GIDSignInUIDelegate {
     GIDSignIn.sharedInstance().signIn()
   }
 
+  func signIn(signIn: GIDSignIn!, dismissViewController viewController: UIViewController!) {
+    self.dismissViewControllerAnimated(true) { () -> Void in
+      self.transitionIfReady()
+    }
+  }
+
   /** Perform segue to main screen after the user has signed in */
-  func signedIn() {
-    performSegueWithIdentifier(Constants.Segues.SignInToFp, sender: nil)
+  func transitionIfReady() {
+    if (GIDSignIn.sharedInstance().currentUser != nil && self.presentedViewController == nil) {
+      self.performSegueWithIdentifier(Constants.Segues.SignInToFp, sender: nil)
+    }
   }
 
 }
