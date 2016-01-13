@@ -71,15 +71,15 @@ To configure Google Sign-In:
 - Also in the **Project > Target > Info > URL Types** panel, create a new item and type your bundle identifier
 in the **URL Schemes** field.
 
-Don't build and run the client until you have one of the servers running. Dont' run 2 servers though :).
+Don't build and run the client until you have one of the servers running. Don't run 2 servers though :).
 
 ### Go server
 
-Read the [Go server instructions](server/Go/README.md). You can get your Server API Key and Sender ID for your project from its **Download and install configuration** page at https://developers.google.com/mobile.add.
+Read the [Go server instructions](server/Go/README.md) to start up the Go server locally on your machine. 
 
 ### Java server
 
-Read the [Java server instructions](server/Java/README.md). You can get your Server API Key and Sender ID for your project from its **Download and install configuration** page at https://developers.google.com/mobile.add.
+Read the [Java server instructions](server/Java/README.md) to start up the Java server locally on your machine. 
 
 ## How to make contributions?
 Please read and follow the steps in the [CONTRIBUTING.md](CONTRIBUTING.md)
