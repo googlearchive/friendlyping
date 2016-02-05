@@ -1,6 +1,6 @@
 # FriendlyPing
 platform :ios, '8.0'
-link_with 'FriendlyPing', 'FriendlyPingSwift'
+target 'FriendlyPingSwift'
 pod 'Google/CloudMessaging'
 pod 'Google/SignIn'
 pod 'Google/AdMob'
