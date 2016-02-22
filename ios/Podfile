@@ -1,7 +1,23 @@
 # FriendlyPing
+
+PROJECT_NAME = 'FriendlyPing'
+TEST_TARGET = 'FriendlyPingSwiftTests'
+SCHEME_FILE = 'FriendlyPingSwiftTests.xcscheme'
+
 platform :ios, '8.0'
-target 'FriendlyPingSwift'
-pod 'Google/CloudMessaging'
-pod 'Google/SignIn'
-pod 'Google/AdMob'
-pod 'Google/Analytics'
+target 'FriendlyPingSwift' do
+  pod 'Google/CloudMessaging'
+  pod 'Google/SignIn'
+  pod 'Google/AdMob'
+  pod 'Google/Analytics'
+end
+
+target 'FriendlyPingSwiftTests' do
+  inherit! :search_paths
+  pod 'EarlGrey'
+end
+
+post_install do |installer|
+  load('configure_earlgrey_pods.rb')
+  configure_for_earlgrey(installer, PROJECT_NAME, TEST_TARGET, SCHEME_FILE)
+end

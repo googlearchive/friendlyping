@@ -7,7 +7,6 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		14F433D25FCAE7397B56557F /* libPods.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 53ECDA2BCE56D9E4FAE51200 /* libPods.a */; };
 		2C29A5A81B2BC6F900A7CB16 /* ClientListDataSource.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2C29A5A71B2BC6F900A7CB16 /* ClientListDataSource.swift */; };
 		2C595EF41B2F979F00355AE7 /* logotype-xxhdpi.png in Resources */ = {isa = PBXBuildFile; fileRef = 2C595EF21B2F979F00355AE7 /* logotype-xxhdpi.png */; };
 		2C595F061B34B73A00355AE7 /* Constants.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2C595F041B34B73A00355AE7 /* Constants.swift */; };
@@ -21,7 +20,19 @@
 		5F5A537E1ADE67D500F81DF0 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5F5A537D1ADE67D500F81DF0 /* AppDelegate.swift */; };
 		5F5A53801ADE67D500F81DF0 /* FPViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5F5A537F1ADE67D500F81DF0 /* FPViewController.swift */; };
 		5F5A539C1ADE69AA00F81DF0 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 5F5A53591ADE670C00F81DF0 /* Main.storyboard */; };
+		FD2E74091C7BCC9500D00352 /* FriendlyPingSwiftTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = FD2E74081C7BCC9500D00352 /* FriendlyPingSwiftTests.swift */; };
+		FD2E74151C7BCF2500D00352 /* EarlGrey.swift in Sources */ = {isa = PBXBuildFile; fileRef = FD2E74131C7BCF2500D00352 /* EarlGrey.swift */; };
 /* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		FD2E740B1C7BCC9500D00352 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 5F5A53441ADE670C00F81DF0 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 5F5A53781ADE67D500F81DF0;
+			remoteInfo = FriendlyPingSwift;
+		};
+/* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
 		2C29A5A71B2BC6F900A7CB16 /* ClientListDataSource.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ClientListDataSource.swift; sourceTree = "<group>"; };
@@ -43,6 +54,11 @@
 		5F5A537F1ADE67D500F81DF0 /* FPViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FPViewController.swift; sourceTree = "<group>"; };
 		5F5A539B1ADE695B00F81DF0 /* BridgingHeader.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = BridgingHeader.h; sourceTree = "<group>"; };
 		69EA7451507DCFDCD3B32AF2 /* Pods.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = Pods.release.xcconfig; path = "Pods/Target Support Files/Pods/Pods.release.xcconfig"; sourceTree = "<group>"; };
+		FD2E74061C7BCC9500D00352 /* FriendlyPingSwiftTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = FriendlyPingSwiftTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		FD2E74081C7BCC9500D00352 /* FriendlyPingSwiftTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FriendlyPingSwiftTests.swift; sourceTree = "<group>"; };
+		FD2E740A1C7BCC9500D00352 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		FD2E74131C7BCF2500D00352 /* EarlGrey.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = EarlGrey.swift; sourceTree = "<group>"; };
+		FD2E74141C7BCF2500D00352 /* FriendlyPingSwiftTests-Bridging-Header.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "FriendlyPingSwiftTests-Bridging-Header.h"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -50,7 +66,13 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				14F433D25FCAE7397B56557F /* libPods.a in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		FD2E74031C7BCC9500D00352 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -82,6 +104,7 @@
 			children = (
 				2C85627A1AFAB65F00F0B24B /* shared */,
 				5F5A537A1ADE67D500F81DF0 /* FriendlyPingSwift */,
+				FD2E74071C7BCC9500D00352 /* FriendlyPingSwiftTests */,
 				5F5A534D1ADE670C00F81DF0 /* Products */,
 				3C09F4A15D185302D921FF28 /* Pods */,
 				AD1F1C80A93A096F652504F5 /* Frameworks */,
@@ -92,6 +115,7 @@
 			isa = PBXGroup;
 			children = (
 				5F5A53791ADE67D500F81DF0 /* FriendlyPingSwift.app */,
+				FD2E74061C7BCC9500D00352 /* FriendlyPingSwiftTests.xctest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -130,6 +154,17 @@
 			name = Frameworks;
 			sourceTree = "<group>";
 		};
+		FD2E74071C7BCC9500D00352 /* FriendlyPingSwiftTests */ = {
+			isa = PBXGroup;
+			children = (
+				FD2E74131C7BCF2500D00352 /* EarlGrey.swift */,
+				FD2E74141C7BCF2500D00352 /* FriendlyPingSwiftTests-Bridging-Header.h */,
+				FD2E74081C7BCC9500D00352 /* FriendlyPingSwiftTests.swift */,
+				FD2E740A1C7BCC9500D00352 /* Info.plist */,
+			);
+			path = FriendlyPingSwiftTests;
+			sourceTree = "<group>";
+		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
@@ -153,13 +188,31 @@
 			productReference = 5F5A53791ADE67D500F81DF0 /* FriendlyPingSwift.app */;
 			productType = "com.apple.product-type.application";
 		};
+		FD2E74051C7BCC9500D00352 /* FriendlyPingSwiftTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = FD2E740F1C7BCC9500D00352 /* Build configuration list for PBXNativeTarget "FriendlyPingSwiftTests" */;
+			buildPhases = (
+				FD2E74021C7BCC9500D00352 /* Sources */,
+				FD2E74031C7BCC9500D00352 /* Frameworks */,
+				FD2E74041C7BCC9500D00352 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				FD2E740C1C7BCC9500D00352 /* PBXTargetDependency */,
+			);
+			name = FriendlyPingSwiftTests;
+			productName = FriendlyPingSwiftTests;
+			productReference = FD2E74061C7BCC9500D00352 /* FriendlyPingSwiftTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
 		5F5A53441ADE670C00F81DF0 /* Project object */ = {
 			isa = PBXProject;
 			attributes = {
-				LastSwiftUpdateCheck = 0700;
+				LastSwiftUpdateCheck = 0730;
 				LastUpgradeCheck = 0700;
 				ORGANIZATIONNAME = "Google Inc.";
 				TargetAttributes = {
@@ -171,6 +224,10 @@
 								enabled = 1;
 							};
 						};
+					};
+					FD2E74051C7BCC9500D00352 = {
+						CreatedOnToolsVersion = 7.3;
+						TestTargetID = 5F5A53781ADE67D500F81DF0;
 					};
 				};
 			};
@@ -188,6 +245,7 @@
 			projectRoot = "";
 			targets = (
 				5F5A53781ADE67D500F81DF0 /* FriendlyPingSwift */,
+				FD2E74051C7BCC9500D00352 /* FriendlyPingSwiftTests */,
 			);
 		};
 /* End PBXProject section */
@@ -202,6 +260,13 @@
 				2C8562851AFAB65F00F0B24B /* Images.xcassets in Resources */,
 				5F5A539C1ADE69AA00F81DF0 /* Main.storyboard in Resources */,
 				2C8562831AFAB65F00F0B24B /* Icon@2x.png in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		FD2E74041C7BCC9500D00352 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -271,7 +336,24 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		FD2E74021C7BCC9500D00352 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				FD2E74151C7BCF2500D00352 /* EarlGrey.swift in Sources */,
+				FD2E74091C7BCC9500D00352 /* FriendlyPingSwiftTests.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		FD2E740C1C7BCC9500D00352 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 5F5A53781ADE67D500F81DF0 /* FriendlyPingSwift */;
+			targetProxy = FD2E740B1C7BCC9500D00352 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
 
 /* Begin PBXVariantGroup section */
 		5F5A53591ADE670C00F81DF0 /* Main.storyboard */ = {
@@ -409,6 +491,37 @@
 			};
 			name = Release;
 		};
+		FD2E740D1C7BCC9500D00352 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				INFOPLIST_FILE = FriendlyPingSwiftTests/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 9.3;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
+				PRODUCT_BUNDLE_IDENTIFIER = com.google.samples.apps.friendlyping.tests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_OBJC_BRIDGING_HEADER = "FriendlyPingSwiftTests/FriendlyPingSwiftTests-Bridging-Header.h";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/FriendlyPingSwift.app/FriendlyPingSwift";
+			};
+			name = Debug;
+		};
+		FD2E740E1C7BCC9500D00352 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				INFOPLIST_FILE = FriendlyPingSwiftTests/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 9.3;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
+				PRODUCT_BUNDLE_IDENTIFIER = com.google.samples.apps.friendlyping.tests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_OBJC_BRIDGING_HEADER = "FriendlyPingSwiftTests/FriendlyPingSwiftTests-Bridging-Header.h";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/FriendlyPingSwift.app/FriendlyPingSwift";
+			};
+			name = Release;
+		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
@@ -426,6 +539,15 @@
 			buildConfigurations = (
 				5F5A53951ADE67D500F81DF0 /* Debug */,
 				5F5A53961ADE67D500F81DF0 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		FD2E740F1C7BCC9500D00352 /* Build configuration list for PBXNativeTarget "FriendlyPingSwiftTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				FD2E740D1C7BCC9500D00352 /* Debug */,
+				FD2E740E1C7BCC9500D00352 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
