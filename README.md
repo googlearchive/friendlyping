@@ -1,3 +1,8 @@
+# Project status #
+![status: inactive](https://img.shields.io/badge/status-inactive-red.svg)
+
+This project is no longer actively maintained, and remains here as an archive of this work.
+
 # Friendly Ping
 
 Friendly Ping demonstrates using GCM, Analytics, Sign In and AdMob together in a single application. 
